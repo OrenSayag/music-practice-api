@@ -24,10 +24,13 @@ CREATE TABLE "users" (
 	"name" text,
 	"first_name" text,
 	"last_name" text,
-	"email" text NOT NULL,
+	"email" text,
 	"email_verified" timestamp,
 	"image" text,
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	"is_guest" boolean DEFAULT false NOT NULL,
+	"guest_id" text,
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
+	CONSTRAINT "users_guest_id_unique" UNIQUE("guest_id")
 );
 --> statement-breakpoint
 CREATE TABLE "verification_tokens" (

@@ -6,7 +6,8 @@ import { users } from '../db/schema.js';
 
 export interface AuthContext {
   userId: string;
-  email: string;
+  email: string | null;
+  isGuest: boolean;
 }
 
 export function requireAuth() {
@@ -15,7 +16,7 @@ export function requireAuth() {
     const userId = authUser?.session?.user?.id;
     const email = authUser?.session?.user?.email;
 
-    if (!userId || !email) {
+    if (!userId) {
       return c.json({ error: 'Unauthenticated' }, 401);
     }
 
@@ -27,7 +28,11 @@ export function requireAuth() {
       return c.json({ error: 'Unauthenticated' }, 401);
     }
 
-    c.set('auth', { userId, email });
+    c.set('auth', {
+      userId,
+      email: email || null,
+      isGuest: dbUser.isGuest,
+    });
     await next();
   });
 }

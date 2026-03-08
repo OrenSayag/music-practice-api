@@ -1,5 +1,5 @@
 {
-  "id": "2b4a6dd7-0367-44a2-9303-bd8dc7ad831c",
+  "id": "e0a48ff2-e13a-4d98-850c-d5aeadbb89eb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -182,7 +182,7 @@
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "email_verified": {
           "name": "email_verified",
@@ -192,6 +192,19 @@
         },
         "image": {
           "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_guest": {
+          "name": "is_guest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "guest_id": {
+          "name": "guest_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -206,6 +219,13 @@
           "nullsNotDistinct": false,
           "columns": [
             "email"
+          ]
+        },
+        "users_guest_id_unique": {
+          "name": "users_guest_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "guest_id"
           ]
         }
       },

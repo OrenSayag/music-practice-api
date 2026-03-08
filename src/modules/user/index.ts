@@ -21,10 +21,11 @@ user.openapi(getMeRoute, async (c) => {
     return c.json({
       user: {
         id: userId,
-        email,
+        email: email || null,
         firstName: dbUser?.firstName || null,
         lastName: dbUser?.lastName || null,
         image: dbUser?.image || null,
+        isGuest: dbUser?.isGuest || false,
       },
     }, 200);
   } catch (error) {
