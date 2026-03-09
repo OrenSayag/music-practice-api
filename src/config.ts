@@ -7,6 +7,10 @@ const env = cleanEnv(process.env, {
   AUTH_URL: str(),
   AUTH_RESEND_KEY: str(),
   EMAIL_FROM: str(),
+  AI_PROVIDER: str({ choices: ['openai', 'anthropic'] }),
+  AI_API_KEY: str(),
+  AI_MODEL: str(),
+  PRACTICE_PLAN_CHAT_SYSTEM_PROMPT_FILE_PATH: str(),
   FRONTEND_URL: str(),
   PORT: num(),
   NODE_ENV: str({ default: 'development' }),
@@ -28,6 +32,12 @@ export const config = {
     resendKey: env.AUTH_RESEND_KEY,
     emailFrom: env.EMAIL_FROM,
     sessionMaxAgeSeconds: env.SESSION_MAX_AGE_SECONDS,
+  },
+  ai: {
+    provider: env.AI_PROVIDER as 'openai' | 'anthropic',
+    apiKey: env.AI_API_KEY,
+    model: env.AI_MODEL,
+    systemPromptFilePath: env.PRACTICE_PLAN_CHAT_SYSTEM_PROMPT_FILE_PATH,
   },
   server: {
     port: env.PORT,

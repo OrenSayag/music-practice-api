@@ -108,10 +108,92 @@ export const sessionTags = pgTable('session_tags', {
   tag: text('tag').notNull(),
 });
 
+// -- Practice Plans --
+
+export const practicePlans = pgTable('practice_plans', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default("today's plan"),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp('updated_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const planSections = pgTable('plan_sections', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  planId: text('plan_id')
+    .notNull()
+    .references(() => practicePlans.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const planItems = pgTable('plan_items', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sectionId: text('section_id')
+    .notNull()
+    .references(() => planSections.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  targetDurationMinutes: integer('target_duration_minutes'),
+  bpm: integer('bpm'),
+  status: text('status').notNull().default('pending'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+// -- Chat Messages --
+
+export const chatMessages = pgTable('chat_messages', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  planId: text('plan_id').references(() => practicePlans.id, {
+    onDelete: 'set null',
+  }),
+  role: text('role').notNull(), // 'user' | 'assistant'
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 // -- Relations --
+
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  user: one(users, {
+    fields: [chatMessages.userId],
+    references: [users.id],
+  }),
+  plan: one(practicePlans, {
+    fields: [chatMessages.planId],
+    references: [practicePlans.id],
+  }),
+}));
 
 export const usersRelations = relations(users, ({ many }) => ({
   practiceSessions: many(practiceSessions),
+  practicePlans: many(practicePlans),
+  chatMessages: many(chatMessages),
 }));
 
 export const practiceSessionsRelations = relations(
@@ -140,5 +222,34 @@ export const sessionTagsRelations = relations(sessionTags, ({ one }) => ({
   session: one(practiceSessions, {
     fields: [sessionTags.sessionId],
     references: [practiceSessions.id],
+  }),
+}));
+
+export const practicePlansRelations = relations(
+  practicePlans,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [practicePlans.userId],
+      references: [users.id],
+    }),
+    sections: many(planSections),
+  })
+);
+
+export const planSectionsRelations = relations(
+  planSections,
+  ({ one, many }) => ({
+    plan: one(practicePlans, {
+      fields: [planSections.planId],
+      references: [practicePlans.id],
+    }),
+    items: many(planItems),
+  })
+);
+
+export const planItemsRelations = relations(planItems, ({ one }) => ({
+  section: one(planSections, {
+    fields: [planItems.sectionId],
+    references: [planSections.id],
   }),
 }));
