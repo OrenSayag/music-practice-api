@@ -24,6 +24,7 @@ export const users = pgTable('users', {
   isGuest: boolean('is_guest').notNull().default(false),
   guestId: text('guest_id').unique(),
   weekStartDay: integer('week_start_day').notNull().default(0), // 0=Sunday, 1=Monday
+  metronomeSound: text('metronome_sound').notNull().default('wood'),
 });
 
 export const accounts = pgTable(

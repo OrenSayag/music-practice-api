@@ -26,6 +26,7 @@ export async function getMe(authUser: AuthUser | null): Promise<SessionResponse>
       image: user.image || null,
       isGuest: dbUser?.isGuest || false,
       weekStartDay: dbUser?.weekStartDay ?? 0,
+      metronomeSound: (dbUser?.metronomeSound as SessionResponse['user']['metronomeSound']) ?? 'wood',
     },
   };
 }

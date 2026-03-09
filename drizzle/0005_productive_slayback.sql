@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "metronome_sound" text DEFAULT 'wood' NOT NULL;
