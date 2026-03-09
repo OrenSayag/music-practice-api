@@ -5,7 +5,9 @@ import {
   integer,
   boolean,
   primaryKey,
+  serial,
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 // -- Auth.js Required Tables --
 
@@ -64,3 +66,78 @@ export const verificationTokens = pgTable(
   },
   (vt) => [primaryKey({ columns: [vt.identifier, vt.token] })]
 );
+
+// -- Practice Sessions --
+
+export const practiceSessions = pgTable('practice_sessions', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  startedAt: timestamp('started_at', { mode: 'date' }).notNull(),
+  endedAt: timestamp('ended_at', { mode: 'date' }),
+  durationSeconds: integer('duration_seconds').notNull().default(0),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const practiceSessionItems = pgTable('practice_session_items', {
+  id: serial('id').primaryKey(),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => practiceSessions.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  section: text('section'),
+  durationSeconds: integer('duration_seconds').notNull().default(0),
+  targetDurationSeconds: integer('target_duration_seconds'),
+  bpm: integer('bpm'),
+  status: text('status').notNull().default('pending'),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+export const sessionTags = pgTable('session_tags', {
+  id: serial('id').primaryKey(),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => practiceSessions.id, { onDelete: 'cascade' }),
+  tag: text('tag').notNull(),
+});
+
+// -- Relations --
+
+export const usersRelations = relations(users, ({ many }) => ({
+  practiceSessions: many(practiceSessions),
+}));
+
+export const practiceSessionsRelations = relations(
+  practiceSessions,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [practiceSessions.userId],
+      references: [users.id],
+    }),
+    items: many(practiceSessionItems),
+    tags: many(sessionTags),
+  })
+);
+
+export const practiceSessionItemsRelations = relations(
+  practiceSessionItems,
+  ({ one }) => ({
+    session: one(practiceSessions, {
+      fields: [practiceSessionItems.sessionId],
+      references: [practiceSessions.id],
+    }),
+  })
+);
+
+export const sessionTagsRelations = relations(sessionTags, ({ one }) => ({
+  session: one(practiceSessions, {
+    fields: [sessionTags.sessionId],
+    references: [practiceSessions.id],
+  }),
+}));

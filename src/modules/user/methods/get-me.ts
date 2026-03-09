@@ -24,6 +24,7 @@ export async function getMe(authUser: AuthUser | null): Promise<SessionResponse>
       firstName: dbUser?.firstName || null,
       lastName: dbUser?.lastName || null,
       image: user.image || null,
+      isGuest: dbUser?.isGuest || false,
     },
   };
 }

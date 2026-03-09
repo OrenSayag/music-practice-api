@@ -8,6 +8,13 @@
       "when": 1772954996202,
       "tag": "0000_chief_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773062770744,
+      "tag": "0001_wealthy_ultragirl",
+      "breakpoints": true
     }
   ]
 }

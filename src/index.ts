@@ -9,6 +9,7 @@ import { auth } from './modules/auth/index.js';
 import { user } from './modules/user/index.js';
 import { health } from './modules/health/index.js';
 import { guest } from './modules/guest/index.js';
+import { dashboard } from './modules/dashboard/index.js';
 import { requireAuth } from './middleware/require-auth.js';
 import { logger } from './utils/logger.js';
 
@@ -33,6 +34,10 @@ app.route('/guest', guest);
 // Protected routes
 app.use('/user/*', requireAuth());
 app.route('/user', user);
+
+app.use('/dashboard/*', requireAuth());
+app.use('/dashboard', requireAuth());
+app.route('/dashboard', dashboard);
 
 // Auth.js built-in routes (handles /api/auth/session, /api/auth/callback, etc.)
 app.use('/auth/*', authHandler());
