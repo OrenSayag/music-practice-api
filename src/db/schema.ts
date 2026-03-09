@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   image: text('image'),
   isGuest: boolean('is_guest').notNull().default(false),
   guestId: text('guest_id').unique(),
+  weekStartDay: integer('week_start_day').notNull().default(0), // 0=Sunday, 1=Monday
 });
 
 export const accounts = pgTable(

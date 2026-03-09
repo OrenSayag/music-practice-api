@@ -25,6 +25,7 @@ export async function getMe(authUser: AuthUser | null): Promise<SessionResponse>
       lastName: dbUser?.lastName || null,
       image: user.image || null,
       isGuest: dbUser?.isGuest || false,
+      weekStartDay: dbUser?.weekStartDay ?? 0,
     },
   };
 }

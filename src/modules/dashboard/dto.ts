@@ -28,6 +28,7 @@ export const dashboardResponseSchema = z.object({
   heatmap: z.array(heatmapDaySchema),
   weeklyStats: weeklyStatsSchema,
   recentSessions: z.array(recentSessionSchema),
+  totalPracticeSeconds: z.number().openapi({ example: 89160 }),
 });
 
 export const errorResponseSchema = z.object({

@@ -8,7 +8,16 @@ export const sessionResponseSchema = z.object({
     lastName: z.string().nullable().openapi({ example: 'Doe' }),
     image: z.string().nullable().openapi({ example: null }),
     isGuest: z.boolean().openapi({ example: false }),
+    weekStartDay: z.number().min(0).max(6).openapi({ example: 0 }),
   }),
+});
+
+export const updatePreferencesSchema = z.object({
+  weekStartDay: z.number().min(0).max(6).openapi({ example: 0, description: '0=Sunday, 1=Monday, ..., 6=Saturday' }),
+});
+
+export const preferencesResponseSchema = z.object({
+  weekStartDay: z.number().openapi({ example: 0 }),
 });
 
 export const errorResponseSchema = z.object({

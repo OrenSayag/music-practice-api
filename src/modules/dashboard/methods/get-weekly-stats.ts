@@ -30,16 +30,23 @@ async function getWeekTotal(
   return Number(row.total);
 }
 
-export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
+function getWeekStart(today: Date, weekStartDay: number): Date {
+  const start = new Date(today);
+  const currentDay = start.getDay();
+  const diff = (currentDay - weekStartDay + 7) % 7;
+  start.setDate(start.getDate() - diff);
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
+
+export async function getWeeklyStats(
+  userId: string,
+  weekStartDay: number = 0
+): Promise<WeeklyStats> {
   const now = new Date();
-  const dayOfWeek = now.getDay();
 
-  // Current week: Sunday to now
-  const thisWeekStart = new Date(now);
-  thisWeekStart.setDate(now.getDate() - dayOfWeek);
-  thisWeekStart.setHours(0, 0, 0, 0);
+  const thisWeekStart = getWeekStart(now, weekStartDay);
 
-  // Last week: previous Sunday to Saturday
   const lastWeekStart = new Date(thisWeekStart);
   lastWeekStart.setDate(lastWeekStart.getDate() - 7);
 

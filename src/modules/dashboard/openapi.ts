@@ -1,9 +1,15 @@
 import { createRoute } from '@hono/zod-openapi';
+import { z } from '@hono/zod-openapi';
 import { dashboardResponseSchema, errorResponseSchema } from './dto.js';
 
 export const getDashboardRoute = createRoute({
   method: 'get',
   path: '/',
+  request: {
+    query: z.object({
+      locale: z.string().optional().openapi({ example: 'en' }),
+    }),
+  },
   responses: {
     200: {
       content: { 'application/json': { schema: dashboardResponseSchema } },
