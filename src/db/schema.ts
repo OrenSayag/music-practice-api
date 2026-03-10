@@ -159,6 +159,45 @@ export const planItems = pgTable('plan_items', {
     .$defaultFn(() => new Date()),
 });
 
+// -- Practice Presets --
+
+export const practicePresets = pgTable('practice_presets', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export const presetSections = pgTable('preset_sections', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  presetId: text('preset_id')
+    .notNull()
+    .references(() => practicePresets.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+export const presetItems = pgTable('preset_items', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sectionId: text('section_id')
+    .notNull()
+    .references(() => presetSections.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  targetDurationMinutes: integer('target_duration_minutes'),
+  bpm: integer('bpm'),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 // -- Chat Messages --
 
 export const chatMessages = pgTable('chat_messages', {
@@ -194,6 +233,7 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   practiceSessions: many(practiceSessions),
   practicePlans: many(practicePlans),
+  practicePresets: many(practicePresets),
   chatMessages: many(chatMessages),
 }));
 
@@ -223,6 +263,35 @@ export const sessionTagsRelations = relations(sessionTags, ({ one }) => ({
   session: one(practiceSessions, {
     fields: [sessionTags.sessionId],
     references: [practiceSessions.id],
+  }),
+}));
+
+export const practicePresetsRelations = relations(
+  practicePresets,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [practicePresets.userId],
+      references: [users.id],
+    }),
+    sections: many(presetSections),
+  })
+);
+
+export const presetSectionsRelations = relations(
+  presetSections,
+  ({ one, many }) => ({
+    preset: one(practicePresets, {
+      fields: [presetSections.presetId],
+      references: [practicePresets.id],
+    }),
+    items: many(presetItems),
+  })
+);
+
+export const presetItemsRelations = relations(presetItems, ({ one }) => ({
+  section: one(presetSections, {
+    fields: [presetItems.sectionId],
+    references: [presetSections.id],
   }),
 }));
 

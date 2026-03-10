@@ -1,1 +1,0 @@
-ALTER TABLE "users" ADD COLUMN "week_start_day" integer DEFAULT 0 NOT NULL;

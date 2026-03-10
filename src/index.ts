@@ -12,6 +12,7 @@ import { guest } from './modules/guest/index.js';
 import { dashboard } from './modules/dashboard/index.js';
 import { plans } from './modules/plans/index.js';
 import { chat } from './modules/chat/index.js';
+import { presets } from './modules/presets/index.js';
 import { requireAuth } from './middleware/require-auth.js';
 import { logger } from './utils/logger.js';
 
@@ -48,6 +49,10 @@ app.route('/plans', plans);
 app.use('/chat/*', requireAuth());
 app.use('/chat', requireAuth());
 app.route('/chat', chat);
+
+app.use('/presets/*', requireAuth());
+app.use('/presets', requireAuth());
+app.route('/presets', presets);
 
 // Auth.js built-in routes (handles /api/auth/session, /api/auth/callback, etc.)
 app.use('/auth/*', authHandler());

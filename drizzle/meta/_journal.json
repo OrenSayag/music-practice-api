@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772954996202,
-      "tag": "0000_chief_epoch",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1773062770744,
-      "tag": "0001_wealthy_ultragirl",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1773063905397,
-      "tag": "0002_loose_agent_zero",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1773067562442,
-      "tag": "0003_practice-plans",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1773071663156,
-      "tag": "0004_chat-messages",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1773077770225,
-      "tag": "0005_productive_slayback",
+      "when": 1773135846824,
+      "tag": "0000_woozy_captain_stacy",
       "breakpoints": true
     }
   ]
