@@ -30,6 +30,7 @@ dashboard.openapi(getDashboardRoute, async (c) => {
       await Promise.all([
         getDailyQuote(locale),
         getWeeklyHeatmap(userId, weekStartDay),
+
         getWeeklyStats(userId, weekStartDay),
         getRecentSessions(userId),
         getTotalPracticeTime(userId),

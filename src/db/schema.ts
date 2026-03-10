@@ -101,12 +101,28 @@ export const practiceSessionItems = pgTable('practice_session_items', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+export const userTags = pgTable('user_tags', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  color: text('color').notNull().default('green'),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const sessionTags = pgTable('session_tags', {
   id: serial('id').primaryKey(),
   sessionId: text('session_id')
     .notNull()
     .references(() => practiceSessions.id, { onDelete: 'cascade' }),
-  tag: text('tag').notNull(),
+  tagId: text('tag_id')
+    .notNull()
+    .references(() => userTags.id, { onDelete: 'cascade' }),
 });
 
 // -- Practice Plans --
@@ -235,6 +251,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   practicePlans: many(practicePlans),
   practicePresets: many(practicePresets),
   chatMessages: many(chatMessages),
+  userTags: many(userTags),
 }));
 
 export const practiceSessionsRelations = relations(
@@ -259,10 +276,22 @@ export const practiceSessionItemsRelations = relations(
   })
 );
 
+export const userTagsRelations = relations(userTags, ({ one, many }) => ({
+  user: one(users, {
+    fields: [userTags.userId],
+    references: [users.id],
+  }),
+  sessionTags: many(sessionTags),
+}));
+
 export const sessionTagsRelations = relations(sessionTags, ({ one }) => ({
   session: one(practiceSessions, {
     fields: [sessionTags.sessionId],
     references: [practiceSessions.id],
+  }),
+  tag: one(userTags, {
+    fields: [sessionTags.tagId],
+    references: [userTags.id],
   }),
 }));
 

@@ -32,10 +32,10 @@ async function getWeekTotal(
 
 function getWeekStart(today: Date, weekStartDay: number): Date {
   const start = new Date(today);
-  const currentDay = start.getDay();
+  const currentDay = start.getUTCDay();
   const diff = (currentDay - weekStartDay + 7) % 7;
-  start.setDate(start.getDate() - diff);
-  start.setHours(0, 0, 0, 0);
+  start.setUTCDate(start.getUTCDate() - diff);
+  start.setUTCHours(0, 0, 0, 0);
   return start;
 }
 
@@ -48,7 +48,7 @@ export async function getWeeklyStats(
   const thisWeekStart = getWeekStart(now, weekStartDay);
 
   const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  lastWeekStart.setUTCDate(lastWeekStart.getUTCDate() - 7);
 
   const lastWeekEnd = new Date(thisWeekStart);
   lastWeekEnd.setMilliseconds(-1);

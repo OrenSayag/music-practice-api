@@ -8,7 +8,6 @@ export const quoteSchema = z.object({
 export const heatmapDaySchema = z.object({
   date: z.string().openapi({ example: '2026-03-09' }),
   totalSeconds: z.number().openapi({ example: 2400 }),
-  level: z.number().min(0).max(4).openapi({ example: 2 }),
 });
 
 export const weeklyStatsSchema = z.object({

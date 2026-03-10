@@ -18,7 +18,11 @@ export async function getRecentSessions(
     orderBy: [desc(practiceSessions.startedAt)],
     limit,
     with: {
-      tags: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
     },
   });
 
@@ -26,6 +30,6 @@ export async function getRecentSessions(
     id: session.id,
     startedAt: session.startedAt.toISOString(),
     durationSeconds: session.durationSeconds,
-    tags: session.tags.map((t) => t.tag),
+    tags: session.tags.map((t) => t.tag.name),
   }));
 }
