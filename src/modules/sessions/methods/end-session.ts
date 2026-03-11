@@ -1,6 +1,9 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { db } from '../../../db/index.js';
-import { practiceSessions } from '../../../db/schema.js';
+import {
+  practiceSessions,
+  practiceSessionItems,
+} from '../../../db/schema.js';
 import { NotFoundException } from '../../../utils/exceptions.js';
 import type { EndSessionRequest, EndSessionResponse } from '../dto.js';
 
@@ -23,18 +26,22 @@ export async function endSession(
     throw new NotFoundException('Session not found');
   }
 
-  // If already ended, only update notes
-  const alreadyEnded = session.endedAt !== null;
+  // Compute duration as sum of session item durations
+  const [{ total }] = await db
+    .select({
+      total:
+        sql<number>`COALESCE(SUM(${practiceSessionItems.durationSeconds}), 0)`.as(
+          'total'
+        ),
+    })
+    .from(practiceSessionItems)
+    .where(eq(practiceSessionItems.sessionId, sessionId));
 
-  const now = new Date();
-  const durationSeconds = alreadyEnded
-    ? session.durationSeconds
-    : Math.round((now.getTime() - session.startedAt.getTime()) / 1000);
+  const durationSeconds = Number(total);
 
   const [updated] = await db
     .update(practiceSessions)
     .set({
-      endedAt: alreadyEnded ? session.endedAt : now,
       durationSeconds,
       notes: input.notes ?? session.notes,
     })
@@ -44,7 +51,6 @@ export async function endSession(
   return {
     id: updated.id,
     startedAt: updated.startedAt.toISOString(),
-    endedAt: updated.endedAt!.toISOString(),
     durationSeconds: updated.durationSeconds,
     notes: updated.notes,
   };

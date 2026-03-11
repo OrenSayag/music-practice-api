@@ -22,7 +22,6 @@ export const endSessionRequestSchema = z.object({
 export const endSessionResponseSchema = z.object({
   id: z.string().openapi({ example: 'uuid-here' }),
   startedAt: z.string().openapi({ example: '2026-03-10T10:00:00.000Z' }),
-  endedAt: z.string().openapi({ example: '2026-03-10T11:00:00.000Z' }),
   durationSeconds: z.number().openapi({ example: 3600 }),
   notes: z.string().nullable().openapi({ example: 'Great practice today' }),
 });

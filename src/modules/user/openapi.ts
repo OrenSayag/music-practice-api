@@ -4,6 +4,8 @@ import {
   errorResponseSchema,
   updatePreferencesSchema,
   preferencesResponseSchema,
+  practiceStateResponseSchema,
+  practiceStateSchema,
 } from './dto.js';
 
 export const getMeRoute = createRoute({
@@ -57,4 +59,57 @@ export const updatePreferencesRoute = createRoute({
   tags: ['User'],
   summary: 'Update user preferences',
   description: 'Updates user preferences like week start day',
+});
+
+export const getPracticeStateRoute = createRoute({
+  method: 'get',
+  path: '/practice-state',
+  responses: {
+    200: {
+      content: { 'application/json': { schema: practiceStateResponseSchema } },
+      description: 'Current practice state',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not authenticated',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Get practice state',
+  description: 'Returns the persisted practice state for the current user',
+});
+
+export const putPracticeStateRoute = createRoute({
+  method: 'put',
+  path: '/practice-state',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: practiceStateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: practiceStateResponseSchema } },
+      description: 'Practice state saved',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not authenticated',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Save practice state',
+  description: 'Saves the current practice state for cross-device persistence',
 });

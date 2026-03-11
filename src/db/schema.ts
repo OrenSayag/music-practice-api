@@ -6,6 +6,7 @@ import {
   boolean,
   primaryKey,
   serial,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -25,6 +26,7 @@ export const users = pgTable('users', {
   guestId: text('guest_id').unique(),
   weekStartDay: integer('week_start_day').notNull().default(0), // 0=Sunday, 1=Monday
   metronomeSound: text('metronome_sound').notNull().default('wood'),
+  practiceState: jsonb('practice_state'),
 });
 
 export const accounts = pgTable(
@@ -79,7 +81,6 @@ export const practiceSessions = pgTable('practice_sessions', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   startedAt: timestamp('started_at', { mode: 'date' }).notNull(),
-  endedAt: timestamp('ended_at', { mode: 'date' }),
   durationSeconds: integer('duration_seconds').notNull().default(0),
   notes: text('notes'),
   createdAt: timestamp('created_at', { mode: 'date' })

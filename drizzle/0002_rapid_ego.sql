@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "practice_state" jsonb;

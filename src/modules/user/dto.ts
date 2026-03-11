@@ -30,3 +30,43 @@ export const errorResponseSchema = z.object({
 });
 
 export type SessionResponse = z.infer<typeof sessionResponseSchema>;
+
+// -- Practice State --
+
+const customTimerSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  totalSeconds: z.number(),
+  remainingSeconds: z.number(),
+  announceEnabled: z.boolean(),
+  announceText: z.string(),
+});
+
+const defaultTimerSettingsSchema = z.object({
+  announceNextItem: z.boolean(),
+  autoStartNextItem: z.boolean(),
+});
+
+const metronomeStateSchema = z.object({
+  bpm: z.number(),
+  beats: z.number(),
+  accents: z.array(z.boolean()),
+});
+
+export const practiceStateSchema = z.object({
+  sessionId: z.string().nullable(),
+  sessionStartedAt: z.string().nullable(),
+  activeItemId: z.string().nullable(),
+  remainingSeconds: z.number(),
+  customTimers: z.array(customTimerSchema),
+  defaultTimerSettings: defaultTimerSettingsSchema,
+  selectedTimerId: z.string().nullable(),
+  metronome: metronomeStateSchema,
+});
+
+export const practiceStateResponseSchema = z.object({
+  practiceState: practiceStateSchema.nullable(),
+});
+
+export type PracticeState = z.infer<typeof practiceStateSchema>;
+export type PracticeStateResponse = z.infer<typeof practiceStateResponseSchema>;

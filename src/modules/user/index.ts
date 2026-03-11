@@ -1,7 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
-import { getMeRoute, updatePreferencesRoute } from './openapi.js';
-import type { SessionResponse } from './dto.js';
+import { getMeRoute, updatePreferencesRoute, getPracticeStateRoute, putPracticeStateRoute } from './openapi.js';
+import type { SessionResponse, PracticeState } from './dto.js';
 import { db } from '../../db/index.js';
 import { users } from '../../db/schema.js';
 import type { AuthContext } from '../../middleware/require-auth.js';
@@ -65,6 +65,41 @@ user.openapi(updatePreferencesRoute, async (c) => {
     }, 200);
   } catch (error) {
     logger.error({ error }, 'Error updating preferences');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+user.openapi(getPracticeStateRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { practiceState: true },
+    });
+
+    return c.json({
+      practiceState: (dbUser?.practiceState as PracticeState) ?? null,
+    }, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error getting practice state');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+user.openapi(putPracticeStateRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const body = c.req.valid('json');
+
+    await db
+      .update(users)
+      .set({ practiceState: body })
+      .where(eq(users.id, userId));
+
+    return c.json({ practiceState: body }, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error saving practice state');
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
