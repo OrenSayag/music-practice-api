@@ -43,6 +43,7 @@ export async function endSession(
     .update(practiceSessions)
     .set({
       durationSeconds,
+      name: input.name ?? session.name,
       notes: input.notes ?? session.notes,
     })
     .where(eq(practiceSessions.id, sessionId))
@@ -52,6 +53,7 @@ export async function endSession(
     id: updated.id,
     startedAt: updated.startedAt.toISOString(),
     durationSeconds: updated.durationSeconds,
+    name: updated.name,
     notes: updated.notes,
   };
 }

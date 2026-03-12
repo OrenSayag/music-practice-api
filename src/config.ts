@@ -20,6 +20,11 @@ const env = cleanEnv(process.env, {
   MAGIC_LINK_RATE_LIMIT_WINDOW_MS: num({ default: 900000 }),
   MAGIC_LINK_RATE_LIMIT_MAX_REQUESTS: num({ default: 5 }),
   SESSION_MAX_AGE_SECONDS: num({ default: 30 * 24 * 60 * 60 }),
+  S3_ENDPOINT: str({ default: 'http://localhost:9000' }),
+  S3_ACCESS_KEY: str({ default: 'minioadmin' }),
+  S3_SECRET_KEY: str({ default: 'minioadmin' }),
+  S3_BUCKET: str({ default: 'recordings' }),
+  S3_REGION: str({ default: 'us-east-1' }),
 });
 
 export const config = {
@@ -54,5 +59,12 @@ export const config = {
   magicLinkRateLimit: {
     windowMs: env.MAGIC_LINK_RATE_LIMIT_WINDOW_MS,
     maxRequests: env.MAGIC_LINK_RATE_LIMIT_MAX_REQUESTS,
+  },
+  storage: {
+    endpoint: env.S3_ENDPOINT,
+    accessKey: env.S3_ACCESS_KEY,
+    secretKey: env.S3_SECRET_KEY,
+    bucket: env.S3_BUCKET,
+    region: env.S3_REGION,
   },
 };

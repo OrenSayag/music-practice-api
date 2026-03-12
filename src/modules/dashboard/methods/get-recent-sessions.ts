@@ -4,6 +4,7 @@ import { practiceSessions } from '../../../db/schema.js';
 
 interface RecentSession {
   id: string;
+  name: string | null;
   startedAt: string;
   durationSeconds: number;
   tags: string[];
@@ -28,6 +29,7 @@ export async function getRecentSessions(
 
   return rows.map((session) => ({
     id: session.id,
+    name: session.name,
     startedAt: session.startedAt.toISOString(),
     durationSeconds: session.durationSeconds,
     tags: session.tags.map((t) => t.tag.name),

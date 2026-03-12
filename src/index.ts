@@ -17,6 +17,7 @@ import { sessions } from './modules/sessions/index.js';
 import { tags } from './modules/tags/index.js';
 import { requireAuth } from './middleware/require-auth.js';
 import { logger } from './utils/logger.js';
+import { ensureBucket } from './lib/storage.js';
 
 const app = new OpenAPIHono().basePath('/api');
 
@@ -78,10 +79,13 @@ app.doc('/doc', {
 });
 app.get('/ui', swaggerUI({ url: '/api/doc' }));
 
-serve({ fetch: app.fetch, port: config.server.port }, (info) => {
-  logger.info({ port: info.port }, 'Server is running');
-  logger.info(
-    { url: `http://localhost:${info.port}/api/ui` },
-    'Swagger UI available'
-  );
+// Ensure S3 bucket exists before starting
+ensureBucket().then(() => {
+  serve({ fetch: app.fetch, port: config.server.port }, (info) => {
+    logger.info({ port: info.port }, 'Server is running');
+    logger.info(
+      { url: `http://localhost:${info.port}/api/ui` },
+      'Swagger UI available'
+    );
+  });
 });

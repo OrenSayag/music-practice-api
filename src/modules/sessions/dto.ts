@@ -16,6 +16,7 @@ export const startSessionResponseSchema = z.object({
 // -- End Session --
 
 export const endSessionRequestSchema = z.object({
+  name: z.string().optional().openapi({ example: 'Morning scales session' }),
   notes: z.string().optional().openapi({ example: 'Great practice today' }),
 });
 
@@ -23,6 +24,7 @@ export const endSessionResponseSchema = z.object({
   id: z.string().openapi({ example: 'uuid-here' }),
   startedAt: z.string().openapi({ example: '2026-03-10T10:00:00.000Z' }),
   durationSeconds: z.number().openapi({ example: 3600 }),
+  name: z.string().nullable().openapi({ example: 'Morning scales session' }),
   notes: z.string().nullable().openapi({ example: 'Great practice today' }),
 });
 
@@ -62,6 +64,24 @@ export const linkTagRequestSchema = z.object({
 });
 
 export const sessionTagsResponseSchema = z.array(userTagSchema);
+
+// -- Recordings --
+
+export const recordingResponseSchema = z.object({
+  id: z.string().openapi({ example: 'uuid-here' }),
+  sessionId: z.string().openapi({ example: 'session-uuid' }),
+  fileName: z.string().openapi({ example: 'recording-001.webm' }),
+  durationSeconds: z.number().openapi({ example: 120 }),
+  fileSize: z.number().openapi({ example: 245760 }),
+  mimeType: z.string().openapi({ example: 'audio/webm' }),
+  createdAt: z.string().openapi({ example: '2026-03-10T10:05:00.000Z' }),
+});
+
+export const recordingsListResponseSchema = z.array(recordingResponseSchema);
+
+export const updateRecordingRequestSchema = z.object({
+  fileName: z.string().min(1).openapi({ example: 'my-recording.webm' }),
+});
 
 // -- Types --
 

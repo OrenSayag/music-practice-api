@@ -17,6 +17,7 @@ export const weeklyStatsSchema = z.object({
 
 export const recentSessionSchema = z.object({
   id: z.string().openapi({ example: 'uuid-here' }),
+  name: z.string().nullable().openapi({ example: 'Morning scales session' }),
   startedAt: z.string().openapi({ example: '2026-03-09T10:00:00.000Z' }),
   durationSeconds: z.number().openapi({ example: 3600 }),
   tags: z.array(z.string()).openapi({ example: ['scales', 'etudes'] }),

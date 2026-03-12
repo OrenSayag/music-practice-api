@@ -82,6 +82,7 @@ export const practiceSessions = pgTable('practice_sessions', {
     .references(() => users.id, { onDelete: 'cascade' }),
   startedAt: timestamp('started_at', { mode: 'date' }).notNull(),
   durationSeconds: integer('duration_seconds').notNull().default(0),
+  name: text('name'),
   notes: text('notes'),
   createdAt: timestamp('created_at', { mode: 'date' })
     .notNull()
@@ -124,6 +125,25 @@ export const sessionTags = pgTable('session_tags', {
   tagId: text('tag_id')
     .notNull()
     .references(() => userTags.id, { onDelete: 'cascade' }),
+});
+
+// -- Session Recordings --
+
+export const sessionRecordings = pgTable('session_recordings', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionId: text('session_id')
+    .notNull()
+    .references(() => practiceSessions.id, { onDelete: 'cascade' }),
+  fileName: text('file_name').notNull(),
+  durationSeconds: integer('duration_seconds').notNull().default(0),
+  fileSize: integer('file_size').notNull().default(0),
+  s3Key: text('s3_key').notNull(),
+  mimeType: text('mime_type').notNull().default('audio/webm'),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 // -- Practice Plans --
@@ -264,6 +284,7 @@ export const practiceSessionsRelations = relations(
     }),
     items: many(practiceSessionItems),
     tags: many(sessionTags),
+    recordings: many(sessionRecordings),
   })
 );
 
@@ -272,6 +293,16 @@ export const practiceSessionItemsRelations = relations(
   ({ one }) => ({
     session: one(practiceSessions, {
       fields: [practiceSessionItems.sessionId],
+      references: [practiceSessions.id],
+    }),
+  })
+);
+
+export const sessionRecordingsRelations = relations(
+  sessionRecordings,
+  ({ one }) => ({
+    session: one(practiceSessions, {
+      fields: [sessionRecordings.sessionId],
       references: [practiceSessions.id],
     }),
   })
