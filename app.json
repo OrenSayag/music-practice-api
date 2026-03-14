@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dokku": {
+      "predeploy": "node dist/src/db/migrate.js"
+    }
+  }
+}

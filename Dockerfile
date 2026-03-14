@@ -23,8 +23,10 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
+COPY prompts ./prompts
+COPY drizzle ./drizzle
 
 ENV NODE_ENV=production
 EXPOSE 443
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]
