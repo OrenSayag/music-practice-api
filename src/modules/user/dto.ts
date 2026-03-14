@@ -64,10 +64,6 @@ const metronomeStateSchema = z.object({
 });
 
 export const practiceStateSchema = z.object({
-  sessionId: z.string().nullable(),
-  sessionStartedAt: z.string().nullable(),
-  activeItemId: z.string().nullable(),
-  remainingSeconds: z.number(),
   customTimers: z.array(customTimerSchema),
   defaultTimerSettings: defaultTimerSettingsSchema,
   selectedTimerId: z.string().nullable(),

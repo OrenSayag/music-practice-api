@@ -84,6 +84,7 @@ export const practiceSessions = pgTable('practice_sessions', {
   durationSeconds: integer('duration_seconds').notNull().default(0),
   name: text('name'),
   notes: text('notes'),
+  status: text('status').notNull().default('active'),
   createdAt: timestamp('created_at', { mode: 'date' })
     .notNull()
     .$defaultFn(() => new Date()),

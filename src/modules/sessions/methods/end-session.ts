@@ -45,6 +45,7 @@ export async function endSession(
       durationSeconds,
       name: input.name ?? session.name,
       notes: input.notes ?? session.notes,
+      status: 'inactive',
     })
     .where(eq(practiceSessions.id, sessionId))
     .returning();

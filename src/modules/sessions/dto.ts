@@ -13,6 +13,17 @@ export const startSessionResponseSchema = z.object({
   startedAt: z.string().openapi({ example: '2026-03-10T10:00:00.000Z' }),
 });
 
+// -- Active Session --
+
+export const activeSessionResponseSchema = z.object({
+  session: z
+    .object({
+      id: z.string().openapi({ example: 'uuid-here' }),
+      startedAt: z.string().openapi({ example: '2026-03-10T10:00:00.000Z' }),
+    })
+    .nullable(),
+});
+
 // -- End Session --
 
 export const endSessionRequestSchema = z.object({
@@ -85,6 +96,11 @@ export const updateRecordingRequestSchema = z.object({
 
 // -- List Sessions --
 
+export const listSessionsQuerySchema = z.object({
+  cursor: z.string().optional().openapi({ example: '2026-03-10T10:00:00.000Z' }),
+  limit: z.coerce.number().int().min(1).max(100).default(20).openapi({ example: 20 }),
+});
+
 export const sessionListItemSchema = z.object({
   id: z.string().openapi({ example: 'uuid-here' }),
   name: z.string().nullable().openapi({ example: 'Morning scales session' }),
@@ -105,6 +121,7 @@ export const sessionStatsSchema = z.object({
 export const listSessionsResponseSchema = z.object({
   sessions: z.array(sessionListItemSchema),
   stats: sessionStatsSchema,
+  nextCursor: z.string().nullable().openapi({ example: '2026-03-09T10:00:00.000Z' }),
 });
 
 // -- Session Detail --
@@ -133,6 +150,7 @@ export const sessionDetailResponseSchema = z.object({
 
 // -- Types --
 
+export type ActiveSessionResponse = z.infer<typeof activeSessionResponseSchema>;
 export type StartSessionResponse = z.infer<typeof startSessionResponseSchema>;
 export type EndSessionRequest = z.infer<typeof endSessionRequestSchema>;
 export type EndSessionResponse = z.infer<typeof endSessionResponseSchema>;
@@ -140,6 +158,7 @@ export type SessionItemInput = z.infer<typeof sessionItemInputSchema>;
 export type SaveSessionItemsRequest = z.infer<
   typeof saveSessionItemsRequestSchema
 >;
+export type ListSessionsQuery = z.infer<typeof listSessionsQuerySchema>;
 export type SessionListItem = z.infer<typeof sessionListItemSchema>;
 export type SessionStats = z.infer<typeof sessionStatsSchema>;
 export type ListSessionsResponse = z.infer<typeof listSessionsResponseSchema>;

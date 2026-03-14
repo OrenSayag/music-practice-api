@@ -11,14 +11,19 @@ import {
   recordingResponseSchema,
   recordingsListResponseSchema,
   updateRecordingRequestSchema,
+  listSessionsQuerySchema,
   listSessionsResponseSchema,
   sessionDetailResponseSchema,
+  activeSessionResponseSchema,
   errorResponseSchema,
 } from './dto.js';
 
 export const listSessionsRoute = createRoute({
   method: 'get',
   path: '/',
+  request: {
+    query: listSessionsQuerySchema,
+  },
   responses: {
     200: {
       content: {
@@ -82,6 +87,48 @@ export const deleteSessionRoute = createRoute({
   },
   tags: ['Sessions'],
   summary: 'Delete a session and its recordings',
+});
+
+export const getActiveSessionRoute = createRoute({
+  method: 'get',
+  path: '/active',
+  responses: {
+    200: {
+      content: {
+        'application/json': { schema: activeSessionResponseSchema },
+      },
+      description: 'Active session or null',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'Get the currently active practice session',
+});
+
+export const cancelSessionRoute = createRoute({
+  method: 'delete',
+  path: '/{sessionId}/cancel',
+  request: {
+    params: z.object({ sessionId: z.string() }),
+  },
+  responses: {
+    204: {
+      description: 'Session cancelled and deleted',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Session not found',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'Cancel an active session (deletes it)',
 });
 
 export const startSessionRoute = createRoute({

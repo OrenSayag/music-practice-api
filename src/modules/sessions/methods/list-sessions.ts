@@ -1,4 +1,4 @@
-import { desc, eq, sql, and, gte } from 'drizzle-orm';
+import { desc, eq, sql, and, lt } from 'drizzle-orm';
 import { db } from '../../../db/index.js';
 import {
   practiceSessions,
@@ -7,12 +7,29 @@ import {
 } from '../../../db/schema.js';
 import type { ListSessionsResponse } from '../dto.js';
 
-export async function listSessions(
-  userId: string
-): Promise<ListSessionsResponse> {
+interface ListSessionsParams {
+  userId: string;
+  cursor?: string;
+  limit: number;
+}
+
+export async function listSessions({
+  userId,
+  cursor,
+  limit,
+}: ListSessionsParams): Promise<ListSessionsResponse> {
+  const conditions = [
+    eq(practiceSessions.userId, userId),
+    eq(practiceSessions.status, 'inactive'),
+  ];
+  if (cursor) {
+    conditions.push(lt(practiceSessions.startedAt, new Date(cursor)));
+  }
+
   const rows = await db.query.practiceSessions.findMany({
-    where: eq(practiceSessions.userId, userId),
+    where: and(...conditions),
     orderBy: [desc(practiceSessions.startedAt)],
+    limit: limit + 1,
     with: {
       tags: {
         with: {
@@ -22,7 +39,10 @@ export async function listSessions(
     },
   });
 
-  // Batch-fetch item counts and recording counts
+  const hasMore = rows.length > limit;
+  if (hasMore) rows.pop();
+
+  // Batch-fetch item counts and recording counts for this page
   const sessionIds = rows.map((r) => r.id);
 
   const itemCounts = sessionIds.length
@@ -72,30 +92,58 @@ export async function listSessions(
     })),
   }));
 
-  // Compute stats
+  const nextCursor = hasMore
+    ? rows[rows.length - 1].startedAt.toISOString()
+    : null;
+
+  // Stats: aggregate over ALL user sessions (not just this page)
+  const stats = await computeStats(userId);
+
+  return { sessions, stats, nextCursor };
+}
+
+async function computeStats(userId: string) {
   const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sunday
+  const dayOfWeek = now.getDay();
   const weekStart = new Date(now);
   weekStart.setDate(now.getDate() - dayOfWeek);
   weekStart.setHours(0, 0, 0, 0);
 
-  const thisWeekSeconds = rows
-    .filter((s) => s.startedAt >= weekStart)
-    .reduce((sum, s) => sum + s.durationSeconds, 0);
+  const [aggregateResult] = await db
+    .select({
+      totalSessions: sql<number>`count(*)`,
+      totalSeconds: sql<number>`coalesce(sum(${practiceSessions.durationSeconds}), 0)`,
+      thisWeekSeconds: sql<number>`coalesce(sum(case when ${practiceSessions.startedAt} >= ${weekStart.toISOString()} then ${practiceSessions.durationSeconds} else 0 end), 0)`,
+    })
+    .from(practiceSessions)
+    .where(
+      and(
+        eq(practiceSessions.userId, userId),
+        eq(practiceSessions.status, 'inactive')
+      )
+    );
 
-  const totalSessions = rows.length;
-
+  const totalSessions = Number(aggregateResult.totalSessions);
+  const totalSeconds = Number(aggregateResult.totalSeconds);
+  const thisWeekSeconds = Number(aggregateResult.thisWeekSeconds);
   const avgDurationSeconds =
-    totalSessions > 0
-      ? Math.round(
-          rows.reduce((sum, s) => sum + s.durationSeconds, 0) / totalSessions
-        )
-      : 0;
+    totalSessions > 0 ? Math.round(totalSeconds / totalSessions) : 0;
 
-  // Compute streak: consecutive days with sessions ending today
-  const sessionDates = new Set(
-    rows.map((s) => s.startedAt.toISOString().slice(0, 10))
-  );
+  // Streak: fetch distinct session dates DESC, iterate until gap
+  const dateRows = await db
+    .selectDistinct({
+      date: sql<string>`date(${practiceSessions.startedAt})`.as('date'),
+    })
+    .from(practiceSessions)
+    .where(
+      and(
+        eq(practiceSessions.userId, userId),
+        eq(practiceSessions.status, 'inactive')
+      )
+    )
+    .orderBy(sql`date(${practiceSessions.startedAt}) desc`);
+
+  const sessionDates = new Set(dateRows.map((r) => r.date));
   let streakDays = 0;
   const checkDate = new Date(now);
   checkDate.setHours(0, 0, 0, 0);
@@ -104,13 +152,5 @@ export async function listSessions(
     checkDate.setDate(checkDate.getDate() - 1);
   }
 
-  return {
-    sessions,
-    stats: {
-      thisWeekSeconds,
-      totalSessions,
-      avgDurationSeconds,
-      streakDays,
-    },
-  };
+  return { thisWeekSeconds, totalSessions, avgDurationSeconds, streakDays };
 }

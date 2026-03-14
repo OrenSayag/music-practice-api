@@ -9,6 +9,8 @@ import {
   startSessionRoute,
   endSessionRoute,
   saveSessionItemsRoute,
+  getActiveSessionRoute,
+  cancelSessionRoute,
   getSessionTagsRoute,
   linkSessionTagRoute,
   unlinkSessionTagRoute,
@@ -23,6 +25,8 @@ import { getSession } from './methods/get-session.js';
 import { deleteSession } from './methods/delete-session.js';
 import { startSession } from './methods/start-session.js';
 import { endSession } from './methods/end-session.js';
+import { getActiveSession } from './methods/get-active-session.js';
+import { cancelSession } from './methods/cancel-session.js';
 import { saveSessionItems } from './methods/save-session-items.js';
 import {
   getSessionTags,
@@ -41,10 +45,22 @@ type Variables = { auth: AuthContext };
 
 export const sessions = new OpenAPIHono<{ Variables: Variables }>();
 
+sessions.openapi(getActiveSessionRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const result = await getActiveSession(userId);
+    return c.json(result, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error getting active session');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
 sessions.openapi(listSessionsRoute, async (c) => {
   try {
     const { userId } = c.get('auth');
-    const result = await listSessions(userId);
+    const { cursor, limit } = c.req.valid('query');
+    const result = await listSessions({ userId, cursor, limit });
     return c.json(result, 200);
   } catch (error) {
     logger.error({ error }, 'Error listing sessions');
@@ -78,6 +94,21 @@ sessions.openapi(deleteSessionRoute, async (c) => {
       return c.json({ error: error.message }, 404);
     }
     logger.error({ error }, 'Error deleting session');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+sessions.openapi(cancelSessionRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const { sessionId } = c.req.valid('param');
+    await cancelSession(userId, sessionId);
+    return c.body(null, 204);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      return c.json({ error: error.message }, 404);
+    }
+    logger.error({ error }, 'Error cancelling session');
     return c.json({ error: 'Internal server error' }, 500);
   }
 });
