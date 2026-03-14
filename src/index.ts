@@ -79,7 +79,7 @@ app.doc('/doc', {
   info: {
     version: '1.0.0',
     title: 'Music Practice API',
-    description: 'Music Practice API with magic link authentication',
+    description: 'Music Practice API with Google OAuth authentication',
   },
 });
 app.get('/ui', swaggerUI({ url: '/api/doc' }));

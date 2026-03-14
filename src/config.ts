@@ -5,8 +5,8 @@ const env = cleanEnv(process.env, {
   DATABASE_URL: str(),
   AUTH_SECRET: str(),
   AUTH_URL: str(),
-  AUTH_RESEND_KEY: str(),
-  EMAIL_FROM: str(),
+  GOOGLE_CLIENT_ID: str(),
+  GOOGLE_CLIENT_SECRET: str(),
   AI_PROVIDER: str({ choices: ['openai', 'anthropic'] }),
   AI_API_KEY: str(),
   AI_MODEL: str(),
@@ -17,8 +17,6 @@ const env = cleanEnv(process.env, {
   LOG_LEVEL: str({ default: 'info' }),
   RATE_LIMIT_WINDOW_MS: num({ default: 900000 }),
   RATE_LIMIT_MAX_REQUESTS: num({ default: 100 }),
-  MAGIC_LINK_RATE_LIMIT_WINDOW_MS: num({ default: 900000 }),
-  MAGIC_LINK_RATE_LIMIT_MAX_REQUESTS: num({ default: 5 }),
   SESSION_MAX_AGE_SECONDS: num({ default: 30 * 24 * 60 * 60 }),
   S3_ENDPOINT: str({ default: 'http://localhost:9000' }),
   S3_ACCESS_KEY: str({ default: 'minioadmin' }),
@@ -34,8 +32,8 @@ export const config = {
   auth: {
     secret: env.AUTH_SECRET,
     url: env.AUTH_URL,
-    resendKey: env.AUTH_RESEND_KEY,
-    emailFrom: env.EMAIL_FROM,
+    googleClientId: env.GOOGLE_CLIENT_ID,
+    googleClientSecret: env.GOOGLE_CLIENT_SECRET,
     sessionMaxAgeSeconds: env.SESSION_MAX_AGE_SECONDS,
   },
   ai: {
@@ -55,10 +53,6 @@ export const config = {
   rateLimit: {
     windowMs: env.RATE_LIMIT_WINDOW_MS,
     maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
-  },
-  magicLinkRateLimit: {
-    windowMs: env.MAGIC_LINK_RATE_LIMIT_WINDOW_MS,
-    maxRequests: env.MAGIC_LINK_RATE_LIMIT_MAX_REQUESTS,
   },
   storage: {
     endpoint: env.S3_ENDPOINT,

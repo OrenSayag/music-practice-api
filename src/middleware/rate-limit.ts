@@ -20,9 +20,3 @@ export const globalRateLimiter = rateLimiter({
   handler: tooManyRequestsHandler,
 });
 
-export const magicLinkRateLimiter = rateLimiter({
-  windowMs: config.magicLinkRateLimit.windowMs,
-  limit: config.magicLinkRateLimit.maxRequests,
-  keyGenerator: ipKeyGenerator,
-  handler: tooManyRequestsHandler,
-});
