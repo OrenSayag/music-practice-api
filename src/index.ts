@@ -84,13 +84,20 @@ app.doc('/doc', {
 });
 app.get('/ui', swaggerUI({ url: '/api/doc' }));
 
-// Ensure S3 bucket exists before starting
-ensureBucket().then(() => {
-  serve({ fetch: app.fetch, port: config.server.port }, (info) => {
-    logger.info({ port: info.port }, 'Server is running');
-    logger.info(
-      { url: `http://localhost:${info.port}/api/ui` },
-      'Swagger UI available'
-    );
-  });
+serve({ fetch: app.fetch, port: config.server.port }, (info) => {
+  logger.info({ port: info.port }, 'Server is running');
+  logger.info(
+    { url: `http://localhost:${info.port}/api/ui` },
+    'Swagger UI available'
+  );
+});
+
+// Ensure S3 bucket exists (retry in background — network may not be ready yet)
+ensureBucket().catch((error) => {
+  logger.warn({ error }, 'Initial S3 bucket check failed, retrying in 10s');
+  setTimeout(() => {
+    ensureBucket().catch((retryError) => {
+      logger.error({ error: retryError }, 'S3 bucket check failed after retry');
+    });
+  }, 10_000);
 });
