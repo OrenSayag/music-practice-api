@@ -3,6 +3,7 @@ import { db } from '../../../db/index.js';
 import { users, sessions } from '../../../db/schema.js';
 import { config } from '../../../config.js';
 import type { GuestLoginRequest, GuestLoginResponse } from '../dto.js';
+import { seedGuestData } from './seed-guest-data.js';
 
 export async function guestLogin(
   input: GuestLoginRequest,
@@ -24,6 +25,8 @@ export async function guestLogin(
       })
       .returning();
     guestUser = created;
+
+    await seedGuestData(guestUser.id);
   }
 
   const sessionToken = crypto.randomUUID();
