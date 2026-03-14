@@ -11,8 +11,78 @@ import {
   recordingResponseSchema,
   recordingsListResponseSchema,
   updateRecordingRequestSchema,
+  listSessionsResponseSchema,
+  sessionDetailResponseSchema,
   errorResponseSchema,
 } from './dto.js';
+
+export const listSessionsRoute = createRoute({
+  method: 'get',
+  path: '/',
+  responses: {
+    200: {
+      content: {
+        'application/json': { schema: listSessionsResponseSchema },
+      },
+      description: 'List of sessions with stats',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'List all practice sessions',
+});
+
+export const getSessionRoute = createRoute({
+  method: 'get',
+  path: '/{sessionId}',
+  request: {
+    params: z.object({ sessionId: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': { schema: sessionDetailResponseSchema },
+      },
+      description: 'Session detail',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Session not found',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'Get session detail',
+});
+
+export const deleteSessionRoute = createRoute({
+  method: 'delete',
+  path: '/{sessionId}',
+  request: {
+    params: z.object({ sessionId: z.string() }),
+  },
+  responses: {
+    204: {
+      description: 'Session deleted',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Session not found',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'Delete a session and its recordings',
+});
 
 export const startSessionRoute = createRoute({
   method: 'post',

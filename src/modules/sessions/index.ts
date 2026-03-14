@@ -3,6 +3,9 @@ import type { AuthContext } from '../../middleware/require-auth.js';
 import { logger } from '../../utils/logger.js';
 import { NotFoundException } from '../../utils/exceptions.js';
 import {
+  listSessionsRoute,
+  getSessionRoute,
+  deleteSessionRoute,
   startSessionRoute,
   endSessionRoute,
   saveSessionItemsRoute,
@@ -15,6 +18,9 @@ import {
   deleteRecordingRoute,
   updateRecordingRoute,
 } from './openapi.js';
+import { listSessions } from './methods/list-sessions.js';
+import { getSession } from './methods/get-session.js';
+import { deleteSession } from './methods/delete-session.js';
 import { startSession } from './methods/start-session.js';
 import { endSession } from './methods/end-session.js';
 import { saveSessionItems } from './methods/save-session-items.js';
@@ -34,6 +40,47 @@ import {
 type Variables = { auth: AuthContext };
 
 export const sessions = new OpenAPIHono<{ Variables: Variables }>();
+
+sessions.openapi(listSessionsRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const result = await listSessions(userId);
+    return c.json(result, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error listing sessions');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+sessions.openapi(getSessionRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const { sessionId } = c.req.valid('param');
+    const session = await getSession(userId, sessionId);
+    return c.json(session, 200);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      return c.json({ error: error.message }, 404);
+    }
+    logger.error({ error }, 'Error getting session');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+sessions.openapi(deleteSessionRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const { sessionId } = c.req.valid('param');
+    await deleteSession(userId, sessionId);
+    return c.body(null, 204);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      return c.json({ error: error.message }, 404);
+    }
+    logger.error({ error }, 'Error deleting session');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
 
 sessions.openapi(startSessionRoute, async (c) => {
   try {
