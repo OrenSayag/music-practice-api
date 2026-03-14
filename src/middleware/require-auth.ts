@@ -2,7 +2,7 @@ import { createMiddleware } from 'hono/factory';
 import { getAuthUser } from '@hono/auth-js';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
+import { users, auditLogs } from '../db/schema.js';
 
 export interface AuthContext {
   userId: string;
@@ -33,6 +33,15 @@ export function requireAuth() {
       email: email || null,
       isGuest: dbUser.isGuest,
     });
+
+    db.insert(auditLogs)
+      .values({
+        userId,
+        method: c.req.method,
+        path: c.req.path,
+      })
+      .catch(() => {});
+
     await next();
   });
 }

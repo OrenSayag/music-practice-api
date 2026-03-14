@@ -57,6 +57,13 @@
       "when": 1773474472995,
       "tag": "0007_same_patriot",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773507757927,
+      "tag": "0008_redundant_inertia",
+      "breakpoints": true
     }
   ]
 }

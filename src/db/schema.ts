@@ -255,6 +255,18 @@ export const chatMessages = pgTable('chat_messages', {
     .$defaultFn(() => new Date()),
 });
 
+// -- Audit Logs --
+
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  method: text('method').notNull(),
+  path: text('path').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 // -- Relations --
 
 export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
