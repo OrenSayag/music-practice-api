@@ -49,6 +49,9 @@ export function getAuthConfig(): AuthConfig {
       async signIn() {
         return true;
       },
+      async redirect() {
+        return `${config.server.frontendUrl}/home`;
+      },
       session({ session, user }) {
         if (user?.id) {
           session.user.id = user.id;
