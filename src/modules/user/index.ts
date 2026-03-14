@@ -1,11 +1,23 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { eq } from 'drizzle-orm';
-import { getMeRoute, updatePreferencesRoute, getPracticeStateRoute, putPracticeStateRoute } from './openapi.js';
+import {
+  getMeRoute,
+  updatePreferencesRoute,
+  getPracticeStateRoute,
+  putPracticeStateRoute,
+  updateProfileRoute,
+  uploadAvatarRoute,
+  deleteAvatarRoute,
+  streamAvatarRoute,
+} from './openapi.js';
 import type { SessionResponse, PracticeState } from './dto.js';
 import { db } from '../../db/index.js';
 import { users } from '../../db/schema.js';
 import type { AuthContext } from '../../middleware/require-auth.js';
 import { logger } from '../../utils/logger.js';
+import { updateProfile } from './methods/update-profile.js';
+import { uploadAvatar, streamAvatar, deleteAvatar } from './methods/avatar.js';
+import { NotFoundException } from '../../utils/exceptions.js';
 
 type MetronomeSound = SessionResponse['user']['metronomeSound'];
 
@@ -27,7 +39,7 @@ user.openapi(getMeRoute, async (c) => {
         email: email || null,
         firstName: dbUser?.firstName || null,
         lastName: dbUser?.lastName || null,
-        image: dbUser?.image || null,
+        image: dbUser?.image ? '/api/user/avatar/stream' : null,
         isGuest: dbUser?.isGuest || false,
         weekStartDay: dbUser?.weekStartDay ?? 0,
         metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
@@ -100,6 +112,68 @@ user.openapi(putPracticeStateRoute, async (c) => {
     return c.json({ practiceState: body }, 200);
   } catch (error) {
     logger.error({ error }, 'Error saving practice state');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// -- Profile --
+
+user.openapi(updateProfileRoute, async (c) => {
+  try {
+    const { userId, email } = c.get('auth');
+    const body = c.req.valid('json');
+    const result = await updateProfile(userId, email, body);
+    return c.json(result, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error updating profile');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// -- Avatar --
+
+user.openapi(uploadAvatarRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const body = await c.req.parseBody();
+    const file = body.file as File;
+    const result = await uploadAvatar(userId, file);
+    return c.json(result, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error uploading avatar');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+user.openapi(deleteAvatarRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    await deleteAvatar(userId);
+    return c.body(null, 204);
+  } catch (error) {
+    logger.error({ error }, 'Error deleting avatar');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+user.openapi(streamAvatarRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const { body, contentType } = await streamAvatar(userId);
+    const buf = Buffer.from(body);
+
+    return new Response(buf, {
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': String(buf.byteLength),
+        'Cache-Control': 'private, max-age=3600',
+      },
+    });
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      return c.json({ error: error.message }, 404);
+    }
+    logger.error({ error }, 'Error streaming avatar');
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

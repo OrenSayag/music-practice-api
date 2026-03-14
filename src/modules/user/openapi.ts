@@ -6,6 +6,8 @@ import {
   preferencesResponseSchema,
   practiceStateResponseSchema,
   practiceStateSchema,
+  updateProfileSchema,
+  uploadAvatarResponseSchema,
 } from './dto.js';
 
 export const getMeRoute = createRoute({
@@ -112,4 +114,99 @@ export const putPracticeStateRoute = createRoute({
   tags: ['User'],
   summary: 'Save practice state',
   description: 'Saves the current practice state for cross-device persistence',
+});
+
+export const updateProfileRoute = createRoute({
+  method: 'patch',
+  path: '/profile',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: updateProfileSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: sessionResponseSchema } },
+      description: 'Profile updated',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not authenticated',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Update user profile',
+  description: 'Updates user first and last name',
+});
+
+export const uploadAvatarRoute = createRoute({
+  method: 'post',
+  path: '/avatar',
+  responses: {
+    200: {
+      content: { 'application/json': { schema: uploadAvatarResponseSchema } },
+      description: 'Avatar uploaded',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not authenticated',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Upload user avatar',
+  description: 'Uploads a profile picture for the current user',
+});
+
+export const deleteAvatarRoute = createRoute({
+  method: 'delete',
+  path: '/avatar',
+  responses: {
+    204: {
+      description: 'Avatar deleted',
+    },
+    401: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Not authenticated',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Delete user avatar',
+  description: 'Removes the user profile picture',
+});
+
+export const streamAvatarRoute = createRoute({
+  method: 'get',
+  path: '/avatar/stream',
+  responses: {
+    200: {
+      description: 'Avatar image binary',
+    },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'No avatar found',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['User'],
+  summary: 'Stream user avatar',
+  description: 'Returns the avatar image binary from S3',
 });

@@ -29,7 +29,17 @@ export const errorResponseSchema = z.object({
   error: z.string().openapi({ example: 'Unauthorized' }),
 });
 
+export const updateProfileSchema = z.object({
+  firstName: z.string().min(1).max(50).optional().openapi({ example: 'John' }),
+  lastName: z.string().min(1).max(50).optional().openapi({ example: 'Doe' }),
+});
+
+export const uploadAvatarResponseSchema = z.object({
+  image: z.string().openapi({ example: '/api/user/avatar/stream' }),
+});
+
 export type SessionResponse = z.infer<typeof sessionResponseSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
 // -- Practice State --
 

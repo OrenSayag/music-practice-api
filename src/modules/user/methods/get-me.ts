@@ -23,7 +23,7 @@ export async function getMe(authUser: AuthUser | null): Promise<SessionResponse>
       email: user.email || '',
       firstName: dbUser?.firstName || null,
       lastName: dbUser?.lastName || null,
-      image: user.image || null,
+      image: dbUser?.image ? '/api/user/avatar/stream' : null,
       isGuest: dbUser?.isGuest || false,
       weekStartDay: dbUser?.weekStartDay ?? 0,
       metronomeSound: (dbUser?.metronomeSound as SessionResponse['user']['metronomeSound']) ?? 'wood',
