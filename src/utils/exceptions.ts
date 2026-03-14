@@ -25,3 +25,17 @@ export class NotFoundException extends ApiError {
     super(message, 404);
   }
 }
+
+export type GuestLimitCode =
+  | 'GUEST_RECORDING_LIMIT'
+  | 'GUEST_CHAT_LIMIT'
+  | 'GUEST_TOTAL_LIMIT';
+
+export class GuestLimitExceededException extends ApiError {
+  public readonly code: GuestLimitCode;
+
+  constructor(message: string, code: GuestLimitCode) {
+    super(message, 403);
+    this.code = code;
+  }
+}

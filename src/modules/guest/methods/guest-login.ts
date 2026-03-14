@@ -1,7 +1,8 @@
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../../../db/index.js';
 import { users, sessions } from '../../../db/schema.js';
 import { config } from '../../../config.js';
+import { GuestLimitExceededException } from '../../../utils/exceptions.js';
 import type { GuestLoginRequest, GuestLoginResponse } from '../dto.js';
 import { seedGuestData } from './seed-guest-data.js';
 
@@ -15,6 +16,18 @@ export async function guestLogin(
   });
 
   if (!guestUser) {
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
+      .where(eq(users.isGuest, true));
+
+    if (count >= config.guest.maxTotal) {
+      throw new GuestLimitExceededException(
+        'Maximum number of guest accounts reached',
+        'GUEST_TOTAL_LIMIT',
+      );
+    }
+
     const [created] = await db
       .insert(users)
       .values({

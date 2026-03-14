@@ -23,6 +23,9 @@ const env = cleanEnv(process.env, {
   S3_SECRET_KEY: str({ default: 'minioadmin' }),
   S3_BUCKET: str({ default: 'recordings' }),
   S3_REGION: str({ default: 'us-east-1' }),
+  GUEST_MAX_RECORDINGS: num({ default: 3 }),
+  GUEST_MAX_CHAT_MESSAGES_PER_DAY: num({ default: 1 }),
+  GUEST_MAX_TOTAL: num({ default: 100 }),
 });
 
 export const config = {
@@ -60,5 +63,10 @@ export const config = {
     secretKey: env.S3_SECRET_KEY,
     bucket: env.S3_BUCKET,
     region: env.S3_REGION,
+  },
+  guest: {
+    maxRecordings: env.GUEST_MAX_RECORDINGS,
+    maxChatMessagesPerDay: env.GUEST_MAX_CHAT_MESSAGES_PER_DAY,
+    maxTotal: env.GUEST_MAX_TOTAL,
   },
 };

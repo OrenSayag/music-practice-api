@@ -15,5 +15,16 @@ export const errorResponseSchema = z.object({
   error: z.string().openapi({ example: 'Invalid guest ID' }),
 });
 
+export const guestLimitErrorResponseSchema = z.object({
+  error: z.string().openapi({ example: 'Guest users are limited to 3 recordings' }),
+  code: z.string().openapi({ example: 'GUEST_RECORDING_LIMIT' }),
+});
+
+export const guestLimitsResponseSchema = z.object({
+  maxRecordings: z.number().openapi({ example: 3 }),
+  maxChatMessagesPerDay: z.number().openapi({ example: 1 }),
+});
+
 export type GuestLoginRequest = z.infer<typeof guestLoginRequestSchema>;
 export type GuestLoginResponse = z.infer<typeof guestLoginResponseSchema>;
+export type GuestLimitsResponse = z.infer<typeof guestLimitsResponseSchema>;

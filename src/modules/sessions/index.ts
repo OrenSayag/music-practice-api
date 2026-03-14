@@ -1,7 +1,11 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import type { AuthContext } from '../../middleware/require-auth.js';
 import { logger } from '../../utils/logger.js';
-import { NotFoundException } from '../../utils/exceptions.js';
+import {
+  NotFoundException,
+  GuestLimitExceededException,
+} from '../../utils/exceptions.js';
+import { assertGuestRecordingLimit } from '../../middleware/guest-limits.js';
 import {
   listSessionsRoute,
   getSessionRoute,
@@ -208,7 +212,11 @@ sessions.openapi(unlinkSessionTagRoute, async (c) => {
 
 sessions.openapi(uploadRecordingRoute, async (c) => {
   try {
-    const { userId } = c.get('auth');
+    const auth = c.get('auth');
+    const { userId } = auth;
+    if (auth.isGuest) {
+      await assertGuestRecordingLimit(userId);
+    }
     const { sessionId } = c.req.valid('param');
     const body = await c.req.parseBody();
     const file = body.file as File;
@@ -216,6 +224,9 @@ sessions.openapi(uploadRecordingRoute, async (c) => {
     const recording = await uploadRecording(userId, sessionId, file, durationSeconds);
     return c.json(recording, 201);
   } catch (error) {
+    if (error instanceof GuestLimitExceededException) {
+      return c.json({ error: error.message, code: error.code }, 403);
+    }
     if (error instanceof NotFoundException) {
       return c.json({ error: error.message }, 404);
     }

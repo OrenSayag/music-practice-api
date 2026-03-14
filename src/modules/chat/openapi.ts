@@ -30,6 +30,17 @@ export const streamChatRoute = createRoute({
       },
       description: 'No user message provided',
     },
+    403: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Guest limit exceeded',
+    },
     500: {
       content: {
         'application/json': {

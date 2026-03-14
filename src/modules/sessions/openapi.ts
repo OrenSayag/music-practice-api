@@ -322,6 +322,17 @@ export const uploadRecordingRoute = createRoute({
       },
       description: 'Recording uploaded',
     },
+    403: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            error: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+      description: 'Guest limit exceeded',
+    },
     404: {
       content: { 'application/json': { schema: errorResponseSchema } },
       description: 'Session not found',

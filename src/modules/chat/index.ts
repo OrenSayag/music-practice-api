@@ -1,6 +1,8 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import type { AuthContext } from '../../middleware/require-auth.js';
 import { logger } from '../../utils/logger.js';
+import { GuestLimitExceededException } from '../../utils/exceptions.js';
+import { assertGuestChatLimit } from '../../middleware/guest-limits.js';
 import { getHistory } from './methods/get-history.js';
 import { saveMessage } from './methods/save-messages.js';
 import { clearHistory } from './methods/clear-history.js';
@@ -18,7 +20,11 @@ export const chat = new OpenAPIHono<{ Variables: Variables }>();
 
 chat.openapi(streamChatRoute, async (c) => {
   try {
-    const { userId } = c.get('auth');
+    const auth = c.get('auth');
+    const { userId } = auth;
+    if (auth.isGuest) {
+      await assertGuestChatLimit(userId);
+    }
     const body = c.req.valid('json');
 
     // Extract text from UIMessage parts format
@@ -83,6 +89,9 @@ chat.openapi(streamChatRoute, async (c) => {
       },
     });
   } catch (error) {
+    if (error instanceof GuestLimitExceededException) {
+      return c.json({ error: error.message, code: error.code }, 403);
+    }
     logger.error({ error }, 'Error in chat stream');
     return c.json({ error: 'Internal server error' }, 500);
   }
