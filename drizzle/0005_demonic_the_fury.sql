@@ -1,0 +1,1 @@
+ALTER TABLE "practice_plans" DROP COLUMN "is_active";

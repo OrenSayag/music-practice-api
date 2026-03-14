@@ -12,6 +12,7 @@ import { deleteSection } from '../../plans/methods/delete-section.js';
 import { deleteItem } from '../../plans/methods/delete-item.js';
 import { reorderPlan } from '../../plans/methods/reorder-plan.js';
 import { getActivePlan } from '../../plans/methods/get-active-plan.js';
+import { createPlan } from '../../plans/methods/create-plan.js';
 import { logger } from '../../../utils/logger.js';
 
 interface StreamChatInput {
@@ -136,7 +137,8 @@ function formatPlanSummary(plan: Awaited<ReturnType<typeof getActivePlan>>) {
 }
 
 export function streamChat(input: StreamChatInput) {
-  const { userId, planId, messages, planContext } = input;
+  const { userId, messages, planContext } = input;
+  let { planId } = input;
   const systemPrompt = systemPromptTemplate.replace('{planContext}', planContext);
 
   return streamText({
@@ -173,7 +175,7 @@ export function streamChat(input: StreamChatInput) {
     },
     tools: {
       updatePlan: {
-        description: `Modify the practice plan. Supports batch operations in a single call:
+        description: `Modify the practice plan. Supports batch operations in a single call. If no plan exists yet, one will be created automatically.
 - addSection: create a new section (name required)
 - addItem: add item to a section (sectionId + name required, optional: targetDurationMinutes, bpm)
 - updateItem: update an existing item (itemId required, optional: name, targetDurationMinutes, bpm, status)
@@ -198,7 +200,12 @@ For addItem operations that reference a newly added section, run addSection firs
           })),
         }),
         execute: async ({ operations }: { operations: PlanOperation[] }) => {
-          if (!planId) return { error: 'No active plan' };
+          // Auto-create plan if none exists
+          if (!planId) {
+            const newPlan = await createPlan(userId, {});
+            planId = newPlan.id;
+            logger.info({ planId }, 'Auto-created plan from chat');
+          }
           const normalized = operations.map((op) => ({
             ...op,
             name: op.type === 'addSection' ? (op.sectionName ?? op.name) : op.name,

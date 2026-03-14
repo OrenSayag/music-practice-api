@@ -1,4 +1,4 @@
-import { eq, and, asc } from 'drizzle-orm';
+import { eq, desc, asc } from 'drizzle-orm';
 import { db } from '../../../db/index.js';
 import { practicePlans, planSections, planItems } from '../../../db/schema.js';
 import { NotFoundException } from '../../../utils/exceptions.js';
@@ -6,10 +6,8 @@ import type { PlanResponse } from '../dto.js';
 
 export async function getActivePlan(userId: string): Promise<PlanResponse> {
   const plan = await db.query.practicePlans.findFirst({
-    where: and(
-      eq(practicePlans.userId, userId),
-      eq(practicePlans.isActive, true)
-    ),
+    where: eq(practicePlans.userId, userId),
+    orderBy: [desc(practicePlans.createdAt)],
     with: {
       sections: {
         orderBy: [asc(planSections.sortOrder)],
@@ -30,7 +28,6 @@ export async function getActivePlan(userId: string): Promise<PlanResponse> {
     id: plan.id,
     userId: plan.userId,
     name: plan.name,
-    isActive: plan.isActive,
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
     sections: plan.sections.map((s) => ({

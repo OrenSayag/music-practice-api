@@ -219,6 +219,28 @@ export const deleteItemRoute = createRoute({
   summary: 'Delete item',
 });
 
+export const resetItemsRoute = createRoute({
+  method: 'post',
+  path: '/{planId}/reset-items',
+  request: {
+    params: z.object({ planId: z.string() }),
+  },
+  responses: {
+    204: { description: 'All items reset to pending' },
+    404: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Plan not found',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Plans'],
+  summary: 'Reset all items to pending',
+  description: 'Bulk-resets all plan items to pending status',
+});
+
 export const reorderPlanRoute = createRoute({
   method: 'put',
   path: '/{planId}/reorder',

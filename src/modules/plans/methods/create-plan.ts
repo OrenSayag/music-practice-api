@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '../../../db/index.js';
 import { practicePlans } from '../../../db/schema.js';
 import type { CreatePlanRequest, PlanResponse } from '../dto.js';
@@ -7,13 +7,10 @@ export async function createPlan(
   userId: string,
   input: CreatePlanRequest
 ): Promise<PlanResponse> {
-  // Deactivate all existing active plans for this user
+  // Delete all existing plans for this user (cascade deletes sections/items)
   await db
-    .update(practicePlans)
-    .set({ isActive: false, updatedAt: new Date() })
-    .where(
-      and(eq(practicePlans.userId, userId), eq(practicePlans.isActive, true))
-    );
+    .delete(practicePlans)
+    .where(eq(practicePlans.userId, userId));
 
   const [plan] = await db
     .insert(practicePlans)
@@ -27,7 +24,6 @@ export async function createPlan(
     id: plan.id,
     userId: plan.userId,
     name: plan.name,
-    isActive: plan.isActive,
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
     sections: [],

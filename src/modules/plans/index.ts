@@ -11,6 +11,7 @@ import {
   createItemRoute,
   updateItemRoute,
   deleteItemRoute,
+  resetItemsRoute,
   reorderPlanRoute,
 } from './openapi.js';
 import { getActivePlan } from './methods/get-active-plan.js';
@@ -21,6 +22,7 @@ import { deleteSection } from './methods/delete-section.js';
 import { createItem } from './methods/create-item.js';
 import { updateItem } from './methods/update-item.js';
 import { deleteItem } from './methods/delete-item.js';
+import { resetItems } from './methods/reset-items.js';
 import { reorderPlan } from './methods/reorder-plan.js';
 
 type Variables = { auth: AuthContext };
@@ -143,6 +145,21 @@ plans.openapi(deleteItemRoute, async (c) => {
       return c.json({ error: error.message }, 404);
     }
     logger.error({ error }, 'Error deleting item');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+plans.openapi(resetItemsRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const { planId } = c.req.valid('param');
+    await resetItems(userId, planId);
+    return c.body(null, 204);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      return c.json({ error: error.message }, 404);
+    }
+    logger.error({ error }, 'Error resetting plan items');
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

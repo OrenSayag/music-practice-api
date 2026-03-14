@@ -30,7 +30,6 @@ export const planResponseSchema = z.object({
   id: z.string().openapi({ example: 'plan-uuid' }),
   userId: z.string().openapi({ example: 'user-uuid' }),
   name: z.string().openapi({ example: "today's plan" }),
-  isActive: z.boolean().openapi({ example: true }),
   createdAt: z.string().openapi({ example: '2026-03-09T10:00:00.000Z' }),
   updatedAt: z.string().openapi({ example: '2026-03-09T10:00:00.000Z' }),
   sections: z.array(planSectionSchema),

@@ -156,7 +156,6 @@ export const practicePlans = pgTable('practice_plans', {
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull().default("today's plan"),
-  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { mode: 'date' })
     .notNull()
     .$defaultFn(() => new Date()),

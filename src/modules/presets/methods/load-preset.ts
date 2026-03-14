@@ -36,13 +36,10 @@ export async function loadPreset(
     throw new NotFoundException('Preset not found');
   }
 
-  // Deactivate current active plans
+  // Delete existing plans (cascade deletes sections/items)
   await db
-    .update(practicePlans)
-    .set({ isActive: false, updatedAt: new Date() })
-    .where(
-      and(eq(practicePlans.userId, userId), eq(practicePlans.isActive, true))
-    );
+    .delete(practicePlans)
+    .where(eq(practicePlans.userId, userId));
 
   // Create new plan from preset
   const [plan] = await db
@@ -105,7 +102,6 @@ export async function loadPreset(
     id: plan.id,
     userId: plan.userId,
     name: plan.name,
-    isActive: plan.isActive,
     createdAt: plan.createdAt.toISOString(),
     updatedAt: plan.updatedAt.toISOString(),
     sections: resultSections,
