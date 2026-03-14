@@ -12,7 +12,11 @@ guest.openapi(guestLoginRoute, async (c) => {
     const body = c.req.valid('json');
     const { response, sessionToken } = await guestLogin(body);
 
-    setCookie(c, 'authjs.session-token', sessionToken, {
+    const cookieName = config.server.isProduction
+      ? '__Secure-authjs.session-token'
+      : 'authjs.session-token';
+
+    setCookie(c, cookieName, sessionToken, {
       path: '/',
       httpOnly: true,
       secure: config.server.isProduction,
