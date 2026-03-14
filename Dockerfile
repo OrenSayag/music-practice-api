@@ -27,6 +27,6 @@ COPY prompts ./prompts
 COPY drizzle ./drizzle
 
 ENV NODE_ENV=production
-EXPOSE 443
+EXPOSE 3000
 
 CMD ["node", "dist/src/index.js"]
