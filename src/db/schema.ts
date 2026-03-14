@@ -142,6 +142,7 @@ export const sessionRecordings = pgTable('session_recordings', {
   fileSize: integer('file_size').notNull().default(0),
   s3Key: text('s3_key').notNull(),
   mimeType: text('mime_type').notNull().default('audio/webm'),
+  isStarred: boolean('is_starred').notNull().default(false),
   createdAt: timestamp('created_at', { mode: 'date' })
     .notNull()
     .$defaultFn(() => new Date()),

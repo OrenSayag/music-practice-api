@@ -50,6 +50,13 @@
       "when": 1773472172005,
       "tag": "0006_superb_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773474472995,
+      "tag": "0007_same_patriot",
+      "breakpoints": true
     }
   ]
 }

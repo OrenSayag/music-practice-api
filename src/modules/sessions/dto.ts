@@ -85,6 +85,7 @@ export const recordingResponseSchema = z.object({
   durationSeconds: z.number().openapi({ example: 120 }),
   fileSize: z.number().openapi({ example: 245760 }),
   mimeType: z.string().openapi({ example: 'audio/webm' }),
+  isStarred: z.boolean().openapi({ example: false }),
   createdAt: z.string().openapi({ example: '2026-03-10T10:05:00.000Z' }),
 });
 

@@ -15,6 +15,7 @@ import { chat } from './modules/chat/index.js';
 import { presets } from './modules/presets/index.js';
 import { sessions } from './modules/sessions/index.js';
 import { tags } from './modules/tags/index.js';
+import { recordings } from './modules/recordings/index.js';
 import { requireAuth } from './middleware/require-auth.js';
 import { logger } from './utils/logger.js';
 import { ensureBucket } from './lib/storage.js';
@@ -64,6 +65,10 @@ app.route('/sessions', sessions);
 app.use('/tags/*', requireAuth());
 app.use('/tags', requireAuth());
 app.route('/tags', tags);
+
+app.use('/recordings/*', requireAuth());
+app.use('/recordings', requireAuth());
+app.route('/recordings', recordings);
 
 // Auth.js built-in routes (handles /api/auth/session, /api/auth/callback, etc.)
 app.use('/auth/*', authHandler());

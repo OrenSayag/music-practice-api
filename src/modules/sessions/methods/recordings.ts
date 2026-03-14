@@ -38,6 +38,7 @@ function toResponse(row: typeof sessionRecordings.$inferSelect): RecordingRespon
     durationSeconds: row.durationSeconds,
     fileSize: row.fileSize,
     mimeType: row.mimeType,
+    isStarred: row.isStarred,
     createdAt: row.createdAt.toISOString(),
   };
 }
