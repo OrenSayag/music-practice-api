@@ -11,7 +11,7 @@ const env = cleanEnv(process.env, {
   AI_API_KEY: str(),
   AI_MODEL: str(),
   PRACTICE_PLAN_CHAT_SYSTEM_PROMPT_FILE_PATH: str(),
-  FRONTEND_URL: str(),
+  FRONTEND_URL: str({ default: '' }),
   PORT: num(),
   NODE_ENV: str({ default: 'development' }),
   LOG_LEVEL: str({ default: 'info' }),
@@ -47,7 +47,7 @@ export const config = {
   },
   server: {
     port: env.PORT,
-    frontendUrl: env.FRONTEND_URL,
+    frontendUrl: env.FRONTEND_URL || env.AUTH_URL,
     isProduction: env.NODE_ENV === 'production',
   },
   logger: {

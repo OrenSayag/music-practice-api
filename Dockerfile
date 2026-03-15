@@ -25,6 +25,7 @@ COPY --from=build /app/dist ./dist
 COPY package.json ./
 COPY prompts ./prompts
 COPY drizzle ./drizzle
+COPY public ./public
 
 ENV NODE_ENV=production
 EXPOSE 443
