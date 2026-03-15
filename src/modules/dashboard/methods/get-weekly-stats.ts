@@ -44,6 +44,8 @@ export async function getWeeklyStats(
   weekStartDay: number = 0
 ): Promise<WeeklyStats> {
   const now = new Date();
+  const endOfToday = new Date(now);
+  endOfToday.setUTCHours(23, 59, 59, 999);
 
   const thisWeekStart = getWeekStart(now, weekStartDay);
 
@@ -53,7 +55,7 @@ export async function getWeeklyStats(
   const lastWeekEnd = new Date(thisWeekStart);
   lastWeekEnd.setMilliseconds(-1);
 
-  const thisWeekTotal = await getWeekTotal(userId, thisWeekStart, now);
+  const thisWeekTotal = await getWeekTotal(userId, thisWeekStart, endOfToday);
   const lastWeekTotal = await getWeekTotal(
     userId,
     lastWeekStart,

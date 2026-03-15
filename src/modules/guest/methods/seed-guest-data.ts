@@ -210,13 +210,13 @@ async function createSessions(
   tags: { id: string; name: string }[],
 ) {
   const now = new Date();
-  const today = now.getDay(); // 0=Sunday
+  const today = now.getUTCDay(); // 0=Sunday
 
   const sessionDefinitions = buildSessionDefinitions(today);
 
   for (const def of sessionDefinitions) {
     const startedAt = getDateForDayOffset(now, def.dayOffset);
-    startedAt.setHours(def.hour, 0, 0, 0);
+    startedAt.setUTCHours(def.hour, 0, 0, 0);
 
     const [session] = await db
       .insert(practiceSessions)
@@ -397,6 +397,6 @@ function buildSessionDefinitions(today: number): SessionDefinition[] {
 
 function getDateForDayOffset(now: Date, dayOffset: number): Date {
   const date = new Date(now);
-  date.setDate(date.getDate() + dayOffset);
+  date.setUTCDate(date.getUTCDate() + dayOffset);
   return date;
 }
