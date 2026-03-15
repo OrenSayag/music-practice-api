@@ -73,23 +73,27 @@ app.route('/recordings', recordings);
 // Auth.js built-in routes (handles /api/auth/session, /api/auth/callback, etc.)
 app.use('/auth/*', authHandler());
 
-// OpenAPI docs
-app.doc('/doc', {
-  openapi: '3.1.0',
-  info: {
-    version: '1.0.0',
-    title: 'Music Practice API',
-    description: 'Music Practice API with Google OAuth authentication',
-  },
-});
-app.get('/ui', swaggerUI({ url: '/api/doc' }));
+// OpenAPI docs (development only)
+if (!config.server.isProduction) {
+  app.doc('/doc', {
+    openapi: '3.1.0',
+    info: {
+      version: '1.0.0',
+      title: 'Music Practice API',
+      description: 'Music Practice API with Google OAuth authentication',
+    },
+  });
+  app.get('/ui', swaggerUI({ url: '/api/doc' }));
+}
 
 serve({ fetch: app.fetch, port: config.server.port }, (info) => {
   logger.info({ port: info.port }, 'Server is running');
-  logger.info(
-    { url: `http://localhost:${info.port}/api/ui` },
-    'Swagger UI available'
-  );
+  if (!config.server.isProduction) {
+    logger.info(
+      { url: `http://localhost:${info.port}/api/ui` },
+      'Swagger UI available'
+    );
+  }
 });
 
 // Ensure S3 bucket exists (retry in background — network may not be ready yet)
