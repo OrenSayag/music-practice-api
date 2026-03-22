@@ -10,7 +10,9 @@
     "db:push": "drizzle-kit push",
     "db:fresh": "drizzle-kit push --force",
     "db:studio": "drizzle-kit studio",
-    "db:wipe": "tsx src/db/wipe.ts"
+    "db:wipe": "tsx src/db/wipe.ts",
+    "ui:build": "cd ../music-practice-ui && pnpm build && rm -rf ../music-practice-api/public && cp -r dist ../music-practice-api/public",
+    "ui:commit": "pnpm ui:build && git add public && git commit -m ':package: update ui static'"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
