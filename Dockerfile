@@ -6,7 +6,7 @@ RUN corepack enable
 # Build stage
 FROM base AS build
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml./
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build
@@ -14,7 +14,7 @@ RUN pnpm build
 # Production deps stage
 FROM base AS prod-deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml./
 RUN pnpm install --frozen-lockfile --prod
 
 # Final stage
