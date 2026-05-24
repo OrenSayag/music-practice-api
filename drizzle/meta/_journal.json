@@ -64,6 +64,13 @@
       "when": 1773507757927,
       "tag": "0008_redundant_inertia",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779616138801,
+      "tag": "0009_special_moon_knight",
+      "breakpoints": true
     }
   ]
 }

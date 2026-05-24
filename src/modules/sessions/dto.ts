@@ -136,6 +136,11 @@ export const sessionDetailItemSchema = z.object({
   status: z.string().openapi({ example: 'done' }),
 });
 
+export const weekStatsResponseSchema = z.object({
+  totalSeconds: z.number().openapi({ example: 14400 }),
+  weekStartIso: z.string().openapi({ example: '2026-03-09T00:00:00.000Z' }),
+});
+
 export const sessionDetailResponseSchema = z.object({
   id: z.string().openapi({ example: 'uuid-here' }),
   name: z.string().nullable().openapi({ example: 'Morning scales session' }),

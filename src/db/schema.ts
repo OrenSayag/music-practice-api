@@ -9,6 +9,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import type { Teacher } from '../modules/user/dto.js';
 
 // -- Auth.js Required Tables --
 
@@ -27,6 +28,7 @@ export const users = pgTable('users', {
   weekStartDay: integer('week_start_day').notNull().default(0), // 0=Sunday, 1=Monday
   metronomeSound: text('metronome_sound').notNull().default('wood'),
   practiceState: jsonb('practice_state'),
+  teacher: jsonb('teacher').$type<Teacher>(),
 });
 
 export const accounts = pgTable(

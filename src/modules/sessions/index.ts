@@ -23,7 +23,9 @@ import {
   streamRecordingRoute,
   deleteRecordingRoute,
   updateRecordingRoute,
+  getWeekStatsRoute,
 } from './openapi.js';
+import { getWeekStats } from './methods/get-week-stats.js';
 import { listSessions } from './methods/list-sessions.js';
 import { getSession } from './methods/get-session.js';
 import { deleteSession } from './methods/delete-session.js';
@@ -56,6 +58,17 @@ sessions.openapi(getActiveSessionRoute, async (c) => {
     return c.json(result, 200);
   } catch (error) {
     logger.error({ error }, 'Error getting active session');
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+sessions.openapi(getWeekStatsRoute, async (c) => {
+  try {
+    const { userId } = c.get('auth');
+    const result = await getWeekStats(userId);
+    return c.json(result, 200);
+  } catch (error) {
+    logger.error({ error }, 'Error getting week stats');
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

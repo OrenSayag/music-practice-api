@@ -10,9 +10,10 @@ import {
   deleteAvatarRoute,
   streamAvatarRoute,
 } from './openapi.js';
-import type { SessionResponse, PracticeState } from './dto.js';
+import type { SessionResponse, PracticeState, Teacher } from './dto.js';
 import { db } from '../../db/index.js';
 import { users } from '../../db/schema.js';
+import type { InferSelectModel } from 'drizzle-orm';
 import type { AuthContext } from '../../middleware/require-auth.js';
 import { logger } from '../../utils/logger.js';
 import { updateProfile } from './methods/update-profile.js';
@@ -20,31 +21,37 @@ import { uploadAvatar, streamAvatar, deleteAvatar } from './methods/avatar.js';
 import { NotFoundException } from '../../utils/exceptions.js';
 
 type MetronomeSound = SessionResponse['user']['metronomeSound'];
+type DbUser = InferSelectModel<typeof users>;
 
 type Variables = { auth: AuthContext };
 
 export const user = new OpenAPIHono<{ Variables: Variables }>();
 
+export function toUserResponse(
+  dbUser: DbUser | undefined,
+  userId: string,
+  email: string | null,
+): SessionResponse {
+  return {
+    user: {
+      id: userId,
+      email: email || null,
+      firstName: dbUser?.firstName || null,
+      lastName: dbUser?.lastName || null,
+      image: dbUser?.image ? '/api/user/avatar/stream' : null,
+      isGuest: dbUser?.isGuest || false,
+      weekStartDay: dbUser?.weekStartDay ?? 0,
+      metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
+      teacher: (dbUser?.teacher as Teacher | null | undefined) ?? null,
+    },
+  };
+}
+
 user.openapi(getMeRoute, async (c) => {
   try {
     const { userId, email } = c.get('auth');
-
-    const dbUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-
-    return c.json({
-      user: {
-        id: userId,
-        email: email || null,
-        firstName: dbUser?.firstName || null,
-        lastName: dbUser?.lastName || null,
-        image: dbUser?.image ? '/api/user/avatar/stream' : null,
-        isGuest: dbUser?.isGuest || false,
-        weekStartDay: dbUser?.weekStartDay ?? 0,
-        metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
-      },
-    }, 200);
+    const dbUser = await db.query.users.findFirst({ where: eq(users.id, userId) });
+    return c.json(toUserResponse(dbUser, userId, email), 200);
   } catch (error) {
     logger.error({ error }, 'Error getting current user');
     return c.json({ error: 'Internal server error' }, 500);
@@ -56,24 +63,25 @@ user.openapi(updatePreferencesRoute, async (c) => {
     const { userId } = c.get('auth');
     const body = c.req.valid('json');
 
+    const existing = await db.query.users.findFirst({ where: eq(users.id, userId) });
     const updateData: Record<string, unknown> = {};
     if (body.weekStartDay !== undefined) updateData.weekStartDay = body.weekStartDay;
     if (body.metronomeSound !== undefined) updateData.metronomeSound = body.metronomeSound;
-
-    if (Object.keys(updateData).length > 0) {
-      await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, userId));
+    if (body.teacher !== undefined) {
+      const current = (existing?.teacher as Partial<Teacher> | null | undefined) ?? null;
+      updateData.teacher = body.teacher === null ? null : { ...(current ?? {}), ...body.teacher };
     }
 
-    const dbUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
+    if (Object.keys(updateData).length > 0) {
+      await db.update(users).set(updateData).where(eq(users.id, userId));
+    }
+
+    const dbUser = await db.query.users.findFirst({ where: eq(users.id, userId) });
 
     return c.json({
       weekStartDay: dbUser?.weekStartDay ?? 0,
       metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
+      teacher: (dbUser?.teacher as Partial<Teacher> | null | undefined) ?? null,
     }, 200);
   } catch (error) {
     logger.error({ error }, 'Error updating preferences');

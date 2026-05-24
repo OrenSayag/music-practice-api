@@ -4,6 +4,7 @@ import { db } from '../../../db/index.js';
 import { users } from '../../../db/schema.js';
 import { UnauthenticatedException } from '../../../utils/exceptions.js';
 import type { SessionResponse } from '../dto.js';
+import { toUserResponse } from '../index.js';
 
 export async function getMe(authUser: AuthUser | null): Promise<SessionResponse> {
   if (!authUser?.session?.user) {
@@ -17,16 +18,5 @@ export async function getMe(authUser: AuthUser | null): Promise<SessionResponse>
     ? await db.query.users.findFirst({ where: eq(users.id, userId) })
     : null;
 
-  return {
-    user: {
-      id: userId,
-      email: user.email || '',
-      firstName: dbUser?.firstName || null,
-      lastName: dbUser?.lastName || null,
-      image: dbUser?.image ? '/api/user/avatar/stream' : null,
-      isGuest: dbUser?.isGuest || false,
-      weekStartDay: dbUser?.weekStartDay ?? 0,
-      metronomeSound: (dbUser?.metronomeSound as SessionResponse['user']['metronomeSound']) ?? 'wood',
-    },
-  };
+  return toUserResponse(dbUser ?? undefined, userId, user.email || null);
 }

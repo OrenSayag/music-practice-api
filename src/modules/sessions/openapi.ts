@@ -15,8 +15,26 @@ import {
   listSessionsResponseSchema,
   sessionDetailResponseSchema,
   activeSessionResponseSchema,
+  weekStatsResponseSchema,
   errorResponseSchema,
 } from './dto.js';
+
+export const getWeekStatsRoute = createRoute({
+  method: 'get',
+  path: '/stats/week',
+  responses: {
+    200: {
+      content: { 'application/json': { schema: weekStatsResponseSchema } },
+      description: 'Total practice time for the current ISO week (UTC)',
+    },
+    500: {
+      content: { 'application/json': { schema: errorResponseSchema } },
+      description: 'Internal server error',
+    },
+  },
+  tags: ['Sessions'],
+  summary: 'Total practice seconds for the current week (UTC)',
+});
 
 export const listSessionsRoute = createRoute({
   method: 'get',
