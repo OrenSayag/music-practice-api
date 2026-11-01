@@ -71,6 +71,20 @@
       "when": 1779616138801,
       "tag": "0009_special_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793365729845,
+      "tag": "0010_useful_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793365737286,
+      "tag": "0011_lush_rhino",
+      "breakpoints": true
     }
   ]
 }

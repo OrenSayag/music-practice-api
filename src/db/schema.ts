@@ -9,7 +9,7 @@ import {
   jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import type { Teacher } from '../modules/user/dto.js';
+import type { ShareContact } from '../modules/user/dto.js';
 
 // -- Auth.js Required Tables --
 
@@ -28,7 +28,7 @@ export const users = pgTable('users', {
   weekStartDay: integer('week_start_day').notNull().default(0), // 0=Sunday, 1=Monday
   metronomeSound: text('metronome_sound').notNull().default('wood'),
   practiceState: jsonb('practice_state'),
-  teacher: jsonb('teacher').$type<Teacher>(),
+  shareContacts: jsonb('share_contacts').$type<ShareContact[]>().notNull().default([]),
 });
 
 export const accounts = pgTable(

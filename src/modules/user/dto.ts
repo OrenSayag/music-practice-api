@@ -3,16 +3,19 @@ import { z } from '@hono/zod-openapi';
 export const SUPPORTED_LANGUAGE_CODES = ['en', 'he'] as const;
 export const languageCodeSchema = z.enum(SUPPORTED_LANGUAGE_CODES);
 
-export const teacherSchema = z.object({
-  name: z.string().min(1).max(100),
-  phone: z.string().regex(/^\+?\d{8,15}$/),
+export const MAX_SHARE_CONTACTS = 20;
+
+export const shareContactSchema = z.object({
+  id: z.string().min(1).max(64),
+  name: z.string().max(100),
+  phone: z.string().max(20),
   language: languageCodeSchema,
+  isDefault: z.boolean(),
 });
 
-export const teacherPatchSchema = teacherSchema.partial();
+export const shareContactsSchema = z.array(shareContactSchema).max(MAX_SHARE_CONTACTS);
 
-export type Teacher = z.infer<typeof teacherSchema>;
-export type TeacherPatch = z.infer<typeof teacherPatchSchema>;
+export type ShareContact = z.infer<typeof shareContactSchema>;
 
 export const metronomeSoundSchema = z.enum(['wood', 'glass', 'electromagnetic', 'arcane']);
 
@@ -26,20 +29,20 @@ export const sessionResponseSchema = z.object({
     isGuest: z.boolean().openapi({ example: false }),
     weekStartDay: z.number().min(0).max(6).openapi({ example: 0 }),
     metronomeSound: metronomeSoundSchema.openapi({ example: 'wood' }),
-    teacher: teacherPatchSchema.nullable().openapi({ example: null }),
+    shareContacts: shareContactsSchema.openapi({ example: [] }),
   }),
 });
 
 export const updatePreferencesSchema = z.object({
   weekStartDay: z.number().min(0).max(6).optional().openapi({ example: 0, description: '0=Sunday, 1=Monday, ..., 6=Saturday' }),
   metronomeSound: metronomeSoundSchema.optional().openapi({ example: 'wood' }),
-  teacher: teacherPatchSchema.nullable().optional().openapi({ description: 'Partial teacher update; null clears the teacher' }),
+  shareContacts: shareContactsSchema.optional().openapi({ description: 'Replaces the full contacts list' }),
 });
 
 export const preferencesResponseSchema = z.object({
   weekStartDay: z.number().openapi({ example: 0 }),
   metronomeSound: metronomeSoundSchema.openapi({ example: 'wood' }),
-  teacher: teacherPatchSchema.nullable().openapi({ example: null }),
+  shareContacts: shareContactsSchema.openapi({ example: [] }),
 });
 
 export const errorResponseSchema = z.object({

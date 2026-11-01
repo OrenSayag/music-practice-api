@@ -10,7 +10,7 @@ import {
   deleteAvatarRoute,
   streamAvatarRoute,
 } from './openapi.js';
-import type { SessionResponse, PracticeState, Teacher } from './dto.js';
+import type { SessionResponse, PracticeState, ShareContact } from './dto.js';
 import { db } from '../../db/index.js';
 import { users } from '../../db/schema.js';
 import type { InferSelectModel } from 'drizzle-orm';
@@ -27,6 +27,10 @@ type Variables = { auth: AuthContext };
 
 export const user = new OpenAPIHono<{ Variables: Variables }>();
 
+function readShareContacts(dbUser: DbUser | undefined): ShareContact[] {
+  return dbUser?.shareContacts ?? [];
+}
+
 export function toUserResponse(
   dbUser: DbUser | undefined,
   userId: string,
@@ -42,7 +46,7 @@ export function toUserResponse(
       isGuest: dbUser?.isGuest || false,
       weekStartDay: dbUser?.weekStartDay ?? 0,
       metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
-      teacher: (dbUser?.teacher as Teacher | null | undefined) ?? null,
+      shareContacts: readShareContacts(dbUser),
     },
   };
 }
@@ -63,14 +67,10 @@ user.openapi(updatePreferencesRoute, async (c) => {
     const { userId } = c.get('auth');
     const body = c.req.valid('json');
 
-    const existing = await db.query.users.findFirst({ where: eq(users.id, userId) });
     const updateData: Record<string, unknown> = {};
     if (body.weekStartDay !== undefined) updateData.weekStartDay = body.weekStartDay;
     if (body.metronomeSound !== undefined) updateData.metronomeSound = body.metronomeSound;
-    if (body.teacher !== undefined) {
-      const current = (existing?.teacher as Partial<Teacher> | null | undefined) ?? null;
-      updateData.teacher = body.teacher === null ? null : { ...(current ?? {}), ...body.teacher };
-    }
+    if (body.shareContacts !== undefined) updateData.shareContacts = body.shareContacts;
 
     if (Object.keys(updateData).length > 0) {
       await db.update(users).set(updateData).where(eq(users.id, userId));
@@ -81,7 +81,7 @@ user.openapi(updatePreferencesRoute, async (c) => {
     return c.json({
       weekStartDay: dbUser?.weekStartDay ?? 0,
       metronomeSound: (dbUser?.metronomeSound ?? 'wood') as MetronomeSound,
-      teacher: (dbUser?.teacher as Partial<Teacher> | null | undefined) ?? null,
+      shareContacts: readShareContacts(dbUser),
     }, 200);
   } catch (error) {
     logger.error({ error }, 'Error updating preferences');
